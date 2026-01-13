@@ -28,4 +28,8 @@ docker run -d \
   docker.hyperdx.io/hyperdx/hyperdx-all-in-one:latest
 
 
-remove masking in log
+
+> openssl genrsa -out jwt_private.pem 2048
+> awk '{printf "%s\\n", $0}' jwt_private.pem
+
+

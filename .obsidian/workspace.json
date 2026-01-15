@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Note.md",
+                "file": "Blog.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Note"
+              "title": "Blog"
             }
           }
         ]
@@ -185,11 +185,11 @@
   },
   "active": "88714d3f6d64ac3d",
   "lastOpenFiles": [
-    "Commands.md",
     "Note.md",
+    "Blog.md",
+    "Commands.md",
     "Hashicorp Vault.md",
     "ClickStack.md",
-    "Blog.md",
     "Study notes.md",
     "Pasted image 20260106150950.png",
     "Pasted image 20260106144823.png",

@@ -33,3 +33,40 @@ docker run -d \
 > awk '{printf "%s\\n", $0}' jwt_private.pem
 
 
+
+```
+docker exec -it units-kafka sh
+```
+
+
+```
+cd /opt/kafka
+```
+
+```
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
+
+./bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic units.token.operations --from-beginning
+
+
+
+
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --delete --topic units.token.operations
+
+
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --topic units.token.operations --partitions 4 --replication-factor 1 --config min.insync.replicas=1
+
+
+
+
+./bin/kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic units.token.operations
+
+
+./bin/kafka-console-producer.sh --bootstrap-server localhost:9092 --topic units.token.operations
+
+
+./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list
+
+./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group token-engine
+```
+

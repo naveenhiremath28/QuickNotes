@@ -1,7 +1,19 @@
 
 
 ```
- docker system prune -a --volumes -f
+docker system prune -a --volumes -f
+```
+
+```curl
+curl --location 'https://api-preproduction.signzy.app/api/v3/otk-service/get-journey/UYM1E23VIC' --header 'Authorization: 44ahJYxr982JGbd8dfRG6Rz7oLEQl5Ee' --header 'Content-Type: application/json'
+```
+
+```
+docker exec -i finternet-app-postgres-1 psql -U finternet -d finternet < /Users/naveenvhiremath/Downloads/Finternet/finternet-app/backend/migrations/001_finternet_db_schema.sql
+```
+
+```
+docker run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 -v postgres:/database/ -d postgres
 ```
 
 ```
@@ -77,4 +89,6 @@ cd /opt/kafka
 
 ./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group token-engine
 ```
+
+
 

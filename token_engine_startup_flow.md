@@ -7,13 +7,6 @@ sor (2.3.41)_
 **Cursor**
 
 
-Reviewing the token engine's initialization and startup flow.
-
-
-
-Reviewing the operation executor and program registry to understand the execution flow:
-
-
 
 ## Token Engine Startup Flow
 
@@ -70,7 +63,7 @@ loop {
     3. Extract trace context (for distributed tracing)
     4. Process message → Execute operation
     5. Commit offset on success
-    6. Handle failures (retry or send to DLQ)
+    6. Handle failures (retry or send to DLQ (dead-letter queue))
 }
 ```
 

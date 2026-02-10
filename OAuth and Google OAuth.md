@@ -266,3 +266,112 @@ A service account's credentials, which you obtain from the Google API Console, i
 This OAuth 2.0 flow is specifically for user authorization. It is designed for applications that can store confidential information and maintain state. A properly authorized web server application can access an API while the user interacts with the application or after the user has left the application.
 
 Web server applications frequently also use [service accounts](https://developers.google.com/identity/protocols/oauth2/service-account) to authorize API requests, particularly when calling Cloud APIs to access project-based data rather than user-specific data. Web server applications can use service accounts in conjunction with user authorization.
+
+# 🧠 What Is OpenID Connect (OIDC)?
+
+**OpenID Connect (OIDC)** is:
+
+✅ An **authentication protocol**  
+✅ Built _on top of OAuth 2.0_  
+✅ Standardized way to **verify user identity** and get basic profile info (like email, name) from an identity provider (IdP) like Google, Microsoft, etc. 
+
+In simple terms:
+
+> OIDC is OAuth **plus** login and identity.  
+> OAuth alone just manages _access to resources_, not _who the user is_. OIDC fills that gap. 
+
+---
+
+## 🎯 Core Purpose
+
+|Protocol|What it does|
+|---|---|
+|**OAuth 2.0**|Authorization → “Can the app access resources on behalf of the user?”|
+|**OIDC**|Authentication + Authorization → “Who is the user?” **and** “Can the app access resources?”|
+
+So:
+
+✔ OAuth = gives **access tokens**  
+✔ OIDC = gives **ID tokens** (identity + authentication) + optionally access tokens 
+
+---
+
+# 🧩 Why OIDC Exists
+
+OAuth 2.0 was designed for **authorization** — letting applications request permission to act on a user’s behalf. But:
+
+❗ OAuth by itself **doesn’t say who the user is**.  
+It only says _“this client has permission”_ without giving identity details. 
+
+OIDC was introduced to fix that by adding:  
+✔ A **standard ID Token** that includes user identity info  
+✔ A **userinfo endpoint**  
+✔ Standardized claims like `name`, `email`, `picture`
+
+This lets applications properly **authenticate** users.
+
+---
+
+# 🧠 What an ID Token Is
+
+The **ID Token** is usually a **JWT (JSON Web Token)** — a signed token that contains information (called _claims_) about:
+
+- Who the user is (e.g., `sub`, `email`)
+    
+- When it was issued
+    
+- Who issued it (the identity provider)
+    
+
+Your backend can inspect this token to **verify the user’s identity** securely. 
+
+---
+
+# 🏁 Relationship Between OAuth 2.0 and OIDC
+
+Think of OIDC like this:
+
+`OAuth 2.0 — Authorization framework        ↓ OIDC — Identity layer built on top`
+
+OIDC adds authentication by using OAuth’s flows but introducing ID Tokens and identity claims. 
+
+So when your app “logs in with Google”, it’s using **OIDC** — Google authenticates the user and sends back an **ID Token**you can trust.
+
+---
+
+# 🔐 Why This Matters in Practice
+
+When you implement login with Google:
+
+1. The user logs in via Google
+    
+2. Google issues an **ID Token (OIDC)** that proves the user’s identity
+    
+3. Your backend verifies that token to know _who the user is_
+    
+4. Optionally use OAuth access tokens to access user’s APIs (if needed)
+    
+
+Without OIDC, you’d have to build your own user authentication system — storing passwords, handling resets, secure session logic — which is hard and risky. 
+
+---
+
+# 📌 Key Points (Beginners)
+
+- **OAuth ≠ Login** — OAuth is authorization. 
+    
+- **OIDC = Login + Identity** built on OAuth. 
+    
+- OIDC gives you an **ID Token** with user identity. 
+    
+
+So:
+
+> If your app needs _to know who the user is_, use **OIDC**.  
+> If your app just needs _to access data on behalf of the user_, OAuth may be enough.
+
+---
+
+## 🧠 Example in One Sentence
+
+**OIDC is OAuth that also tells you who the user is — securely and in a standardized way.**a

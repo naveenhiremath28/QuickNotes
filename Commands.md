@@ -1,4 +1,5 @@
 
+docs.finternetlab.io
 
 ```
 docker system prune -a --volumes -f
@@ -90,5 +91,23 @@ cd /opt/kafka
 ./bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group token-engine
 ```
 
+
+
+```bash
+openssl genrsa -out private.pem 2048 && \
+
+openssl rsa -in private.pem -pubout -out public.pem && \
+
+echo "PRIVATE_KEY=$(tr -d '\n' < private.pem)" && \
+
+echo "PUBLIC_KEY=$(tr -d '\n' < public.pem)"
+```
+
+```bash
+openssl genrsa -out private.pem 2048 && \
+openssl rsa -in private.pem -pubout -out public.pem && \
+echo "PRIVATE_KEY=$(cat private.pem)" && \
+echo "PUBLIC_KEY=$(cat public.pem)"
+```
 
 

@@ -1,6 +1,4 @@
-```
-Interview me in detail using the AskUserQuestionTool about literally anything: technical implementation, UI & UX, concerns, tradeoffs, etc. but make sure the questions are not obvious. Be very in-depth and continue interviewing me continually until it's complete, then write the spec to the file
-```
+we need to add datasource in playground instead dataset id selection
 
 ```
 naveen.hiremath@finternetlab.io
@@ -11,26 +9,7 @@ lakshmi@example.co.in
 ```
 
 
-error handling issue:
-* currently when we make external calls (otp-service), even though we have error 400 from otp-service, units its taking as 503 or 500 in generic
-* verify end to end errors
-
-
-
-
-
-
-
-
-Audit the entire Workflow API codebase for `panic()` calls, `log.Fatal()` in request handlers, and unhandled error paths. Replace them with proper `AppError` returns using the structured error types in `workflow/src/errors/app_error.go` (e.g., `apperrors.Internal()`, `apperrors.InvalidInput()`). The recover middleware in `workflow/src/middlewares/recover.go` catches panics but this should be a safety net, not the primary error handling mechanism.
-
-**Acceptance Criteria:**
-- [ ] Zero `panic()` calls in controller and service layers
-- [ ] All error paths return typed `AppError` with appropriate HTTP status codes
-- [ ] Recover middleware only triggers for truly unexpected panics
-- [ ] Error responses follow the standard envelope format with error codes
-
-and for otp-service responses as well, whatever error and error status from otp service is currently considered as 503 service unavailable, so its difficult to recognize some errors
+implement otel for app backend, follow similar pattern how we did for units (no spaces and under_score with lowercase)
 
 
 
@@ -40,12 +19,19 @@ and for otp-service responses as well, whatever error and error status from otp 
 
 
 
+have better knowledge on - system design
 
+http://interviewready.io/course-page/system-design-course?srsltid=AfmBOopZyZwoO-bebCmK2cfDobkI9A00ObFHy2sHXF6_3ECDHKy-UUST
 
+aws https://www.udemy.com/course/aws-certified-developer-associate-dva-c01/?utm_campaign=Search_Keyword_Alpha_Prof_la.ES_cc.ROW-Spanish&utm_source=google&utm_medium=paid-search&portfolio=ROW-Spanish&utm_audience=mx&utm_tactic=nb&utm_term=capacitaci%C3%B3n%20aws&utm_content=g&funnel=&test=&gad_source=1&gad_campaignid=21487757262&gbraid=0AAAAADROdO0-d-vpbTkOOYkF4ttp3kPn7&gclid=Cj0KCQiAtfXMBhDzARIsAJ0jp3BZg1AqmjopWhZsK4IpIDswB_T-ahtJxZNslcjFupUpvvOt7Vl2PN8aAu-7EALw_wcB
 
+exam - https://aws.amazon.com/certification/certified-developer-associate/
 
+Bytebyte code
+https://bytebytego.com/
+https://bytebytego.com/guides/api-web-development/
 
-
+try to build micro services projects, ai projects (like book my show)
 
 
 

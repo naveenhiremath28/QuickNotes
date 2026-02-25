@@ -8,17 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "3f520458da219c06",
+            "id": "65519c01c2369e0b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "sample.md",
+                "file": "Explore.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "sample"
+              "title": "Explore"
             }
           }
         ]
@@ -183,11 +183,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "3f520458da219c06",
+  "active": "65519c01c2369e0b",
   "lastOpenFiles": [
-    "Commands.md",
+    "Kuberenetes.md",
+    "Explore.md",
     "Note.md",
-    "sample.md",
+    "Commands.md",
+    "Prompts.md",
     "Basics.md",
     "Pasted image 20260131153859.png",
     "Demo code.md",
@@ -195,7 +197,6 @@
     "OAuth and Google OAuth.md",
     "Pasted image 20260131153415.png",
     "token_engine_startup_flow.md",
-    "Kuberenetes.md",
     "Study notes.md",
     "tokenEngine and tokenProgram.md",
     "Blog.md",

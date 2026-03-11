@@ -1,4 +1,5 @@
 
+
 docs.finternetlab.io
 
 ```
@@ -14,7 +15,7 @@ docker exec -i finternet-app-postgres-1 psql -U finternet -d finternet < /Users/
 ```
 
 ```
-docker run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5433:5432 -v postgres:/database/ -d postgres
+docker run --name postgresql -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=postgres -p 5432:5432 -v postgres:/database/ -d postgres
 ```
 
 ```
@@ -110,4 +111,16 @@ echo "PRIVATE_KEY=$(cat private.pem)" && \
 echo "PUBLIC_KEY=$(cat public.pem)"
 ```
 
+
+
+
+```bash
+export COOKIE_SECURE=false
+export SESSION_SECRET=sdfasdf 
+export DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+
+export GOOGLE_CLIENT_ID=97051580690-956a3vf7ttb3qoeppg5ilp3elggf9maq.apps.googleusercontent.com 
+export GOOGLE_CLIENT_SECRET=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 
+export GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/google/callback
+```
 

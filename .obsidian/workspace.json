@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "System Design.md",
+                "file": "K8S Roadmap.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "System Design"
+              "title": "K8S Roadmap"
             }
           }
         ],
@@ -202,10 +202,10 @@
   "lastOpenFiles": [
     "Kuberenetes.md",
     "System Design.md",
-    "K8S Roadmap.md",
-    "Note.md",
-    "Prompts.md",
     "Note2.md",
+    "Note.md",
+    "K8S Roadmap.md",
+    "Prompts.md",
     "Commands.md",
     "OPA (Open Policy Agent).md",
     "Explore.md",

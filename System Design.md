@@ -291,6 +291,8 @@ class DBFactory:
   
         raise ValueError("Unsupported database type")
 
+
+
 The **factory decides which object to create**.
 
 Client does **not know implementation details**.
@@ -1042,7 +1044,7 @@ class Strategy {
         this.paymentStrategy = payment;
     }
 
-    void pay() {
+    void payment() {
         paymentStrategy.pay();
     }
 
@@ -1056,11 +1058,13 @@ public class Main {
     public static void main(String[] args) {
 
         Payment p1 = new PhonePay();
+    
 
         Strategy s1 = new Strategy(p1);
         s1.pay();
 
-        s1.setPaymentStrategy(new GooglePay());
+		Payment p2 = new GooglePay();
+        s1.setPaymentStrategy(p2);
         s1.pay();
     }
 }
@@ -1312,3 +1316,475 @@ Desktop Display: Temperature updated to 30.5
 Mobile Display: Temperature updated to 31.5
 */
 ``` 
+
+
+```java
+ // Stratergy Design Pattern
+
+interface Payment {
+    processPayment()
+}
+
+class CreditCardPayment implements Payment {
+    @override
+    processPayment() {
+
+    }
+}
+
+class UPIPayment implements Payment {
+    @override
+    processPayment() {
+
+    }
+}
+
+class PayPalPayment implements Payment {
+    @override
+    processPayment() {
+
+    }
+}
+
+class Stratergy {
+
+    Stratergy(Payment payment){
+        this.payment = payment
+    }
+
+    processPayment() {
+        payment.processPayment()
+    }
+
+    setNewPayment(Payment payment) {
+        this.payment = payment
+    }
+}
+
+main() {
+    Payment creditCardPayment = new CreditCardPayment();
+    Payment upiPayment = new UPIPayment();
+    Payment payPalPayment = new PayPalPayment();
+
+    Stratergy s = new Stratergy(creditCardPayment);
+
+    s.processPayment()
+
+    s.setNewPayment(upiPayment)
+    s.processPayment()
+
+    s.setNewPayment(payPalPayment)
+    s.processPayment()
+}
+
+---
+
+// Observer Design Pattern
+
+interface Subscriber {
+    notification()
+}
+
+class Mobile implements Subscriber {
+    @override
+    notification() {
+
+    }
+}
+
+class WebDashboard implements Subscriber {
+    @override
+    notification() {
+
+    }
+}
+
+class TradingBot implements Subscriber {
+    @override
+    notification() {
+
+    }
+}
+
+interface StockInter {
+    addSubscriber(Subscriber subscriber)
+    removeSubscriber(Subscriber subscriber)
+    notifySubscribers()
+}
+
+class Stock implements StockInter {
+
+    List<Subscriber> subscribers = []
+
+    @override
+    addSubscriber(Subscriber subscriber) {
+        subscribers.add(subscriber)
+    }
+
+    @override
+    removeSubscriber(Subscriber subscriber) {
+        subscribers.remove(subscriber)
+    }
+
+    @override
+    notify() {
+        for i -> subscribers {
+            i.notification()
+        }
+    }
+}
+```
+
+
+**Iterator Design Pattern**
+
+```java
+interface PlayListIterator {
+
+hasNext()
+
+next()
+
+}
+
+  
+
+class SimpleIterator implements PlayListIterator {
+
+PlayList list;
+
+Int index
+
+SimpleIterator( PlayList list){
+
+this.list = list
+
+this.index = 0
+
+}
+
+  
+
+hasNext(){
+
+index = size of PlayList
+
+return
+
+}
+
+  
+
+next(){
+
+PlayList.getSongs().get(index++)
+
+}
+
+}
+
+  
+  
+
+class ShuffledIterator implements PlayListIterator {
+
+PlayList list;
+
+PlayList shuffled;
+
+Int index
+
+ShuffledIterator( PlayList list){
+
+this.list = list
+
+this.shuffled = Collection.shuffled(list)
+
+this.index = 0
+
+}
+
+  
+  
+
+hasNext(){
+
+index = size of shuffled
+
+return
+
+}
+
+  
+
+next(){
+
+shuffled.getSongs().get(index++)
+
+}
+
+}
+
+  
+
+class FavIterator implements PlayListIterator {
+
+PlayList list;
+
+PlayList shuffled;
+
+Int index
+
+FavIterator( PlayList list){
+
+some logic
+
+}
+
+  
+  
+
+hasNext(){
+
+index = size of fav
+
+return
+
+}
+
+  
+
+next(){
+
+fav.get(index++)
+
+}
+
+}
+
+  
+
+class PlayList {
+
+ArrayList songs;
+
+addSong(<type>) {
+
+songs.add(---)
+
+}
+
+  
+
+getSongs() {
+
+return songs
+
+}
+
+  
+
+PlayListIterator iterator(string type) {
+
+if type == "simple"{
+
+return new SimpleIterator(songs)
+
+}
+
+else if type == "fav"{
+
+return new FavIterator(songs)
+
+} else if type == "shuffled" {
+
+return new ShuffledIterator(songs)
+
+}
+
+  
+
+}
+
+}
+```
+
+```java
+class Book {
+    String title;
+    boolean fav;
+
+    Book(String title, boolean fav) {
+        this.title = title;
+        this.fav = fav;
+    }
+}
+
+interface Iterator {
+    boolean hasNext();
+    Book next();
+}
+
+class AllBooksIterator implements Iterator {
+
+    List<Book> books;
+    int index;
+
+    AllBooksIterator(List<Book> books) {
+        this.books = books;
+        this.index = 0;
+    }
+
+    public boolean hasNext() {
+        return index < books.size();
+    }
+
+    public Book next() {
+        return books.get(index++);
+    }
+}
+
+class FavoriteBooksIterator implements Iterator {
+
+    List<Book> books;
+    int index;
+
+    FavoriteBooksIterator(List<Book> books) {
+        this.books = books;
+        this.index = 0;
+    }
+
+    public boolean hasNext() {
+        while (index < books.size() && !books.get(index).fav) {
+            index++;
+        }
+        return index < books.size();
+    }
+
+    public Book next() {
+        return books.get(index++);
+    }
+}
+
+class Library {
+
+    List<Book> books = new ArrayList<>();
+
+    void addBook(Book book) {
+        books.add(book);
+    }
+
+    Iterator createAllBooksIterator() {
+        return new AllBooksIterator(books);
+    }
+
+    Iterator createFavoriteBooksIterator() {
+        return new FavoriteBooksIterator(books);
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+
+        Library library = new Library();
+
+        library.addBook(new Book("Clean Code", true));
+        library.addBook(new Book("Design Patterns", false));
+        library.addBook(new Book("The Pragmatic Programmer", true));
+        library.addBook(new Book("Refactoring", false));
+
+        System.out.println("All Books:");
+        Iterator allIterator = library.createAllBooksIterator();
+        while (allIterator.hasNext()) {
+            Book book = allIterator.next();
+            System.out.println(book.title);
+        }
+
+        System.out.println("\nFavorite Books:");
+        Iterator favIterator = library.createFavoriteBooksIterator();
+        while (favIterator.hasNext()) {
+            Book book = favIterator.next();
+            System.out.println(book.title);
+        }
+    }
+}
+```
+
+
+**Command Design Principle**
+```java
+
+class TV {
+    on() { }  // logic to turn on the tv
+    off() { } // logic to turn off the tv
+}
+
+interface Action {
+    void execute()
+}
+
+class TVOn implements Action {
+    TV tv
+
+    TVOn(TV tv) {
+        this.tv = tv
+    }
+
+    void execute() {
+        tv.on()
+    }
+}
+
+class TVOff implements Action {
+    TV tv
+
+    TVOff(TV tv) {
+        this.tv = tv
+    }
+
+    void execute() {
+        tv.off()
+    }
+}
+
+class RemoteControl {
+    Action onAction
+    Action offAction
+
+    setOnAction(Action action) {
+        this.onAction = action
+    }
+
+    setOffAction(Action action) {
+        this.offAction = action
+    }
+
+    void pressOnButton() {
+        onAction.execute()
+    }
+
+    void pressOffButton() {
+        offAction.execute()
+    }
+}
+
+main() {
+    TV tv = new TV()
+
+	RemoteControl remote = new RemoteControl()
+
+    Action onAction = new TVOn(tv)
+    Action offAction = new TVOff(tv)
+
+    remote.setOnAction(onAction)
+    remote.setOffAction(offAction)
+
+    remote.pressOnButton()
+    remote.pressOffButton()
+}
+```
+
+
+
+
+

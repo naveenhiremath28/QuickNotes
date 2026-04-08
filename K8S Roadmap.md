@@ -96,7 +96,7 @@ Hands-on:
 
 - Ingress Controller (Kong)
 
-- Network Policies
+- Network Policies - **Pending**
 
 
 ### Storage
@@ -312,7 +312,7 @@ Hands-on:
 
     - Azure Kubernetes Service
 
-- ** Load Balancers **
+- **Load Balancers**
 
 - Cloud Storage Integration
 

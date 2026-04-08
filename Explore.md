@@ -741,3 +741,251 @@ That is RESTful design.
 - **UI Testing** This tests the UI interactions with the APIs to make sure the data can be displayed properly.
 - **Fuzz Testing** This injects invalid or unexpected input data into the API and tries to crash the API. In this way, it identifies the API vulnerabilities.
 
+
+
+## Web3
+
+**Web3** refers to the next generation of the internet built on **blockchain technology**, aiming to make the web more **decentralized, transparent, and user-owned**.
+
+Here’s a simple breakdown:
+
+### 🔹 What is Web3?
+
+Web3 is an evolution of the internet:
+
+- **Web1 (1990s–early 2000s):** Read-only (static websites)
+- **Web2 (current):** Read + write (social media, apps, big tech control)
+- **Web3:** Read + write + **own** (users control their data and assets)
+
+---
+
+### 🔹 Key Features
+
+- **Decentralization:** No single company controls the system (uses blockchain)
+- **Ownership:** You own your digital assets (crypto, NFTs)
+- **Trustless systems:** No need for intermediaries (banks, platforms)
+- **Smart contracts:** Code that runs automatically on blockchain
+
+---
+
+### 🔹 Examples of Web3
+
+- Cryptocurrencies (Bitcoin, Ethereum)
+- NFTs (digital ownership of art, items)
+- DeFi (decentralized finance apps)
+- DAOs (community-run organizations)
+
+---
+
+### 🔹 Why it matters
+
+- More privacy and control for users
+- Less reliance on big tech companies
+- New ways to earn, invest, and build online
+
+---
+
+### 🔹 Downsides / Challenges
+
+- Still complex for beginners
+- Security risks (scams, hacks)
+- Regulation is unclear
+- Scalability issues
+
+
+
+
+Advantages
+* Anonymous signon
+* self governing
+* better search
+* Personalized browsing experience (ads)
+* uninterrupted services
+* User will also receive some tokens when he saw some add (because he invested his time) in brave
+
+
+cons
+* regulation issues
+
+
+
+
+
+---
+
+# 🧱 1. ACID (Traditional Databases – Strong Consistency)
+
+ACID ensures **reliability and correctness** of transactions.
+
+### 🔹 A – Atomicity
+
+- “All or nothing”
+- Example: Bank transfer
+    - Debit succeeds but credit fails → rollback everything
+
+### 🔹 C – Consistency
+
+- Database always stays in a **valid state**
+- Rules/constraints are never violated
+
+### 🔹 I – Isolation
+
+- Transactions don’t interfere
+- Parallel queries behave like they ran one-by-one
+
+### 🔹 D – Durability
+
+- Once committed → **never lost** (even after crash)
+
+### 👉 Example
+
+In a payment system:
+
+Transfer ₹100 from A → B
+
+Either:
+
+- Both debit & credit happen ✅  
+    OR
+- Nothing happens ❌
+
+👉 Used in:
+
+- PostgreSQL
+- MySQL
+- Oracle
+
+---
+
+# ⚡ 2. BASE (NoSQL / High Scalability Systems)
+
+BASE is more relaxed than ACID.
+
+### 🔹 B – Basically Available
+
+- System always responds (even if data is not perfect)
+
+### 🔹 A – Soft State
+
+- Data can change over time (eventual updates)
+
+### 🔹 E – Eventually Consistent
+
+- Data becomes consistent **later**
+
+---
+
+### 👉 Example
+
+Think of:
+
+- Instagram likes 👍
+- You like a post → count may not update instantly everywhere
+
+Eventually → all nodes sync ✔️
+
+---
+
+### 👉 Used in:
+
+- Cassandra
+- DynamoDB
+- MongoDB (in some modes)
+
+---
+
+# ⚖️ ACID vs BASE (Quick Comparison)
+
+|Feature|ACID 🧱|BASE ⚡|
+|---|---|---|
+|Consistency|Strong|Eventual|
+|Availability|Lower|High|
+|Performance|Slower|Faster|
+|Use case|Banking, finance|Social media, analytics|
+
+---
+
+# 🌍 3. Distributed Databases (Example: Yugabyte)
+
+Now comes the interesting part.
+
+### 👉 What is a Distributed DB?
+
+- Data is stored across **multiple machines (nodes)**
+- Still behaves like a **single database**
+
+---
+
+## 🔹 Example: Yugabyte
+
+Yugabyte tries to give:  
+👉 **ACID + Scalability (like BASE systems)**
+
+---
+
+### 🧠 How it works
+
+#### 1. Data Sharding
+
+- Data split into pieces (shards)
+- Stored across multiple nodes
+
+#### 2. Replication
+
+- Each shard has copies (replicas)
+- Ensures fault tolerance
+
+#### 3. Consensus (Raft)
+
+- Nodes agree before committing data
+- Ensures **consistency (ACID-like)**
+
+---
+
+### 👉 Example Scenario
+
+You have an app running in:
+
+- India 🇮🇳
+- US 🇺🇸
+- Europe 🇪🇺
+
+User in India writes data:
+
+👉 Yugabyte:
+
+1. Writes to nearest node
+2. Replicates to others
+3. Uses consensus → ensures correctness
+
+Even if one node crashes:  
+👉 System still works ✅
+
+---
+
+### 🔥 Why Yugabyte is powerful
+
+- Distributed like NoSQL
+- SQL support like PostgreSQL
+- Strong consistency (ACID)
+- High availability
+
+👉 It basically solves:
+
+> “How do we scale without losing correctness?”
+
+---
+
+# 🧠 Final Intuition
+
+- **ACID** → correctness first
+- **BASE** → scalability & availability first
+- **Distributed DB (Yugabyte)** → tries to balance both
+
+---
+
+# 🚀 Simple Analogy
+
+- **ACID** = Bank system (strict, safe)
+- **BASE** = Social media (fast, flexible)
+- **Distributed DB** = Global bank (safe + scalable)

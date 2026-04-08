@@ -27,6 +27,7 @@ Think of it as:
 - Relationships (Inheritance, Association, Composition, etc.)
 ```
 
+
 ```
 ### Example Classes:
 
@@ -1440,174 +1441,101 @@ class Stock implements StockInter {
 
 ```java
 interface PlayListIterator {
-
-hasNext()
-
-next()
-
+    boolean hasNext();
+    Song next();
 }
-
-  
 
 class SimpleIterator implements PlayListIterator {
 
-PlayList list;
+    PlayList list;
+    int index;
 
-Int index
+    SimpleIterator(PlayList list) {
+        this.list = list;
+        this.index = 0;
+    }
 
-SimpleIterator( PlayList list){
+    boolean hasNext() {
+        return index < list.getSongs().size();
+    }
 
-this.list = list
-
-this.index = 0
-
+    Song next() {
+        return list.getSongs().get(index++);
+    }
 }
-
-  
-
-hasNext(){
-
-index = size of PlayList
-
-return
-
-}
-
-  
-
-next(){
-
-PlayList.getSongs().get(index++)
-
-}
-
-}
-
-  
-  
 
 class ShuffledIterator implements PlayListIterator {
 
-PlayList list;
+    PlayList list;
+    List<Song> shuffled;
+    int index;
 
-PlayList shuffled;
+    ShuffledIterator(PlayList list) {
+        this.list = list;
+        this.shuffled = Collections.shuffle(list.getSongs());
+        this.index = 0;
+    }
 
-Int index
+    boolean hasNext() {
+        return index < shuffled.size();
+    }
 
-ShuffledIterator( PlayList list){
-
-this.list = list
-
-this.shuffled = Collection.shuffled(list)
-
-this.index = 0
-
+    Song next() {
+        return shuffled.get(index++);
+    }
 }
-
-  
-  
-
-hasNext(){
-
-index = size of shuffled
-
-return
-
-}
-
-  
-
-next(){
-
-shuffled.getSongs().get(index++)
-
-}
-
-}
-
-  
 
 class FavIterator implements PlayListIterator {
 
-PlayList list;
+    PlayList list;
+    List<Song> fav;
+    int index;
 
-PlayList shuffled;
+    FavIterator(PlayList list) {
+        this.list = list;
+        // some logic to filter favorite songs
+        this.fav = getFavSongs(list.getSongs());
+        this.index = 0;
+    }
 
-Int index
+    boolean hasNext() {
+        return index < fav.size();
+    }
 
-FavIterator( PlayList list){
-
-some logic
-
+    Song next() {
+        return fav.get(index++);
+    }
 }
-
-  
-  
-
-hasNext(){
-
-index = size of fav
-
-return
-
-}
-
-  
-
-next(){
-
-fav.get(index++)
-
-}
-
-}
-
-  
 
 class PlayList {
 
-ArrayList songs;
+    ArrayList<Song> songs;
 
-addSong(<type>) {
+    void addSong(Song song) {
+        songs.add(song);
+    }
 
-songs.add(---)
+    ArrayList<Song> getSongs() {
+        return songs;
+    }
 
-}
+    PlayListIterator iterator(String type) {
 
-  
+        if (type.equals("simple")) {
+            return new SimpleIterator(this);
+        } 
+        else if (type.equals("fav")) {
+            return new FavIterator(this);
+        } 
+        else if (type.equals("shuffled")) {
+            return new ShuffledIterator(this);
+        }
 
-getSongs() {
-
-return songs
-
-}
-
-  
-
-PlayListIterator iterator(string type) {
-
-if type == "simple"{
-
-return new SimpleIterator(songs)
-
-}
-
-else if type == "fav"{
-
-return new FavIterator(songs)
-
-} else if type == "shuffled" {
-
-return new ShuffledIterator(songs)
-
-}
-
-  
-
-}
-
+        return null;
+    }
 }
 ```
+
 
 ```java
 class Book {
@@ -1785,6 +1713,348 @@ main() {
 ```
 
 
+**Mediator Design Pattern**
+```java
+class Bidder {
+
+    public String name;
+    Auctioner act;
+
+    Bidder(String name, Auctioner act) {
+        this.name = name;
+        this.act = act;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void received(float amount) {
+        System.out.println(this.name + ": Notified with bid amount: " + amount);
+    }
+
+    public void placeBid(float amount) {
+        this.act.placeBid(this, amount);
+    }
+}
+
+interface Auctioner {
+
+    public void register(Bidder bidder);
+
+    public void unregister(Bidder bidder);
+
+    public void placeBid(Bidder bidder, float amount);
+
+    public void notifyBidder(Bidder bidder, float amount);
+}
+
+class AuctionHouse implements Auctioner {
+
+    List<Bidder> bidders = new ArrayList<>();
+
+    @Override
+    public void register(Bidder bidder) {
+        bidders.add(bidder);
+    }
+
+    @Override
+    public void unregister(Bidder bidder) {
+        bidders.remove(bidder);
+    }
+
+    @Override
+    public void notifyBidder(Bidder bidder, float amount) {
+        for (Bidder b : bidders) {
+            if (b != bidder) {
+                b.received(amount);
+            }
+        }
+    }
+
+    @Override
+    public void placeBid(Bidder bidder, float amount) {
+        System.out.println(
+            "New Bid: Bidder " + bidder.getName() + " has placed a bid of " + amount
+        );
+        notifyBidder(bidder, amount);
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Auctioner auctioner = new AuctionHouse();
+
+        Bidder b1 = new Bidder("Alice", auctioner);
+        Bidder b2 = new Bidder("Bob", auctioner);
+
+        auctioner.register(b1);
+        auctioner.register(b2);
+
+        b1.placeBid(1000);
+        b2.placeBid(2000);
+    }
+}
+```
 
 
+**State Design Pattern**
+```java
+interface State {
+    void next(Context context);
+}
 
+class RedState implements State {
+
+    @Override
+    public void next(Context context) {
+        System.out.println("Red -> Green");
+        context.setState(new GreenState());
+    }
+}
+
+class GreenState implements State {
+
+    @Override
+    public void next(Context context) {
+        System.out.println("Green -> Yellow");
+        context.setState(new YellowState());
+    }
+}
+
+class YellowState implements State {
+
+    @Override
+    public void next(Context context) {
+        System.out.println("Yellow -> Red");
+        context.setState(new RedState());
+    }
+}
+
+class Context {
+
+    private State state;
+
+    Context() {
+        this.state = new RedState();
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void next() {
+        state.next(this);
+    }
+}
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        Context signal = new Context();
+
+        signal.next();
+        signal.next();
+        signal.next();
+        signal.next();
+    }
+}
+```
+
+
+## **Structural Design Pattern**
+
+### 1. **Adapter Design Pattern**
+
+```java
+class SmartDevice {
+    turnOn();
+    turnOff();
+}
+
+class AirConditioner {
+    connectViaBluetooth()
+    disConnectBiaBluetooth()
+    turnOnCooling()
+    turnOffCoolling()
+}
+
+class SmartLight {
+    connectViaWifi()
+    disConnectViaWifi()
+    turnOnLight()
+    turnOffLight()
+}
+
+class CoffeeBrewing {
+    connectViaZigbee()
+    disConnectViaZigbee()
+    turnOnBrewing()
+    turnOffBrewing()
+}
+
+class AirConditionerAdapter implements SmartDevice {
+    AirConditioner airConditioner
+
+    AirConditionerAdapter(AirConditioner airConditioner) {
+        this.airConditioner = airConditioner;
+    }
+
+    turnOn() {
+        airConditioner.connectViaBluetooth()
+        airConditioner.turnOnCooling()
+    }
+
+    turnOff() {
+        airConditioner.disConnectBiaBluetooth()
+        airConditioner.turnOffCoolling()
+    }
+}
+
+class SmartLightAdapter implements SmartDevice {
+    SmartLight smartLight
+
+    SmartLightAdapter(SmartLight smartLight) {
+        this.smartLight = smartLight;
+    }
+
+    turnOn() {
+        smartLight.connectViaWifi()
+        smartLight.turnOnLight()
+    }
+
+    turnOff() {
+        smartLight.disConnectViaWifi()
+        smartLight.turnOffLight()
+    }
+}
+
+class CoffeeBrewingAdapter implements SmartDevice {
+    CoffeeBrewing coffeeBrewing
+
+    CoffeeBrewingAdapter(CoffeeBrewing coffeeBrewing) {
+        this.coffeeBrewing = coffeeBrewing;
+    }
+
+    turnOn() {
+        coffeeBrewing.connectViaZigbee()
+        coffeeBrewing.turnOnBrewing()
+    }
+
+    turnOff() {
+        coffeeBrewing.disConnectViaZigbee()
+        coffeeBrewing.turnOffBrewing()
+    }
+}
+
+class SmartController {
+    SmartDevice airConditioner = new AirConditionerAdapter(new AirConditioner());
+    SmartDevice smartLight = new SmartLightAdapter(new SmartLight());
+    SmartDevice coffeeBrewing = new CoffeeBrewingAdapter(new CoffeeBrewing());
+
+    airConditioner.turnOn()
+    smartLight.turnOn()
+    coffeeBrewing.turnOn()
+
+    airConditioner.turnOff()
+    smartLight.turnOff()
+    coffeeBrewing.turnOff()
+}
+```
+
+
+**Composite Design Pattern**
+```java
+interface SmartComponent {
+    turnOn()
+    turnOff()
+}
+
+class AirConditioner implements SmartComponent {
+    turnOn() {
+        print("AC turned ON")
+    }
+
+    turnOff() {
+        print("AC turned OFF")
+    }
+}
+
+class SmartBulb implements SmartComponent {
+    turnOn() {
+        print("Bulb turned ON")
+    }
+
+    turnOff() {
+        print("Bulb turned OFF")
+    }
+}
+
+class CompositeComponent implements SmartComponent {
+    List<SmartComponent> components = new ArrayList<>()
+
+    addComponent(SmartComponent component) {
+        components.add(component)
+    }
+
+    removeComponent(SmartComponent component) {
+        components.remove(component)
+    }
+
+    turnOn() {
+        for (SmartComponent component : components) {
+            component.turnOn()
+        }
+    }
+
+    turnOff() {
+        for (SmartComponent component : components) {
+            component.turnOff()
+        }
+    }
+}
+
+class SmartController {
+
+    main() {
+
+        // Room 1 devices
+        SmartComponent ac1 = new AirConditioner()
+        SmartComponent bulb1 = new SmartBulb()
+
+        CompositeComponent room1 = new CompositeComponent()
+        room1.addComponent(ac1)
+        room1.addComponent(bulb1)
+
+        // Room 2 devices
+        SmartComponent ac2 = new AirConditioner()
+        SmartComponent bulb2 = new SmartBulb()
+
+        CompositeComponent room2 = new CompositeComponent()
+        room2.addComponent(ac2)
+        room2.addComponent(bulb2)
+
+        // Floor 1
+        CompositeComponent floor1 = new CompositeComponent()
+        floor1.addComponent(room1)
+        floor1.addComponent(room2)
+
+        // Floor 2
+        CompositeComponent floor2 = new CompositeComponent()
+        floor2.addComponent(room1)
+        floor2.addComponent(room2)
+
+        // House
+        CompositeComponent house = new CompositeComponent()
+        house.addComponent(floor1)
+        house.addComponent(floor2)
+
+        // Control entire house
+        house.turnOn()
+        house.turnOff()
+    }
+}
+```

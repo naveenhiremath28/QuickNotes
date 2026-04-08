@@ -1,4 +1,20 @@
-we need to add datasource in playground instead dataset id selection
+
+
+Doubt: why jwt validation cant be done int api gateway
+```
+ZP@b7axAgCAlbX
+```
+
+```bash
+export OTEL_SERVICE_NAME=finternet-units-workflow
+export SERVICE_VERSION=1.0.0
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_EXPORTER_OTLP_HEADERS=authorization=246da7cc-626d-48ba-b7a4-eed53c9ee0ed
+```
+
+```
+claude --dangerously-skip-permissions
+```
 
 ```
 naveen.hiremath@finternetlab.io
@@ -24,13 +40,63 @@ lakshmi@example.co.in
 ```
 
 
+```
+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
+```
 
 
 
 ```
-When hovering over a pie chart segment, the tooltip overlaps with the "Total Tokens" label in the center.
+kubectl exec -n units-api units-api-7c78c5d64c-487jl -- env | grep -i "CRYPTO\|VAULT\|ROLE\|SECRET"
 ```
 
+```
+curl -s -X POST http://localhost:8200/v1/auth/approle/login \ -d '{"role_id":"<actual-role-id>","secret_id":"<actual-secret-id>"}'
+```
+
+```
+ curl -s -X POST http://localhost:8200/v1/auth/approle/login \
+  -d '{"role_id":"finternet-user","secret_id":"paS8fpZHvIuHbCsRjeRiwrS4Vz99cXfj"}'
+```
+
+
+
+
+
+
+```
+CRYPTO_CONFIG={"address":"http://vault.vault.svc.cluster.local:8200","authMethod":"kubernetes","kubernetesRole":"units-api","kubernetesAuthPath":"kubernetes","transitMount":"transit","encryptionKeyName":"units-encryption-master","jwtAuthPath":"jwt","jwtRole":"finternet-user"}
+```
+
+
+### Get the service account token (it's also a JWT)
+```bash
+kubectl exec -n units-api units-api-7c78c5d64c-487jl -- \
+  cat /var/run/secrets/kubernetes.io/serviceaccount/token
+```
+
+
+
+
+```
+curl -s -X POST http://localhost:8200/v1/auth/jwt/login \
+  -d '{
+    "role": "finternet-user",
+    "jwt": "eyJhbGciOiJSUzI1NiIsImtpZCI6IklIejhheFlEX2JpRXQ4WXpleUk5Q3MwdHRNV1BRaDdsMWltb1dKWlpMTE0ifQ.eyJhdWQiOlsiaHR0cHM6Ly9jb250YWluZXIuZ29vZ2xlYXBpcy5jb20vdjEvcHJvamVjdHMvZmludGVybmV0LXNhbmRib3gvbG9jYXRpb25zL2FzaWEtc291dGhlYXN0MS1hL2NsdXN0ZXJzL2ZpbnRlcm5ldC1kZXYtY2x1c3RlciJdLCJleHAiOjE4MDY3MzA2NjgsImlhdCI6MTc3NTE5NDY2OCwiaXNzIjoiaHR0cHM6Ly9jb250YWluZXIuZ29vZ2xlYXBpcy5jb20vdjEvcHJvamVjdHMvZmludGVybmV0LXNhbmRib3gvbG9jYXRpb25zL2FzaWEtc291dGhlYXN0MS1hL2NsdXN0ZXJzL2ZpbnRlcm5ldC1kZXYtY2x1c3RlciIsImp0aSI6IjcyZWQ2ZmYwLTc0MjktNDkxNS1iNGE3LTMxNTdhNjZmZDAyMiIsImt1YmVybmV0ZXMuaW8iOnsibmFtZXNwYWNlIjoidW5pdHMtYXBpIiwibm9kZSI6eyJuYW1lIjoiZ2tlLWZpbnRlcm5ldC1kZXYtY2wtZmludGVybmV0LWRldi1wby05ZWFiYzc0Yy04ZWo2IiwidWlkIjoiNmViNzhiODktYTdlMy00MzM1LWI2YTUtNWJjMTE5MTk0NmU4In0sInBvZCI6eyJuYW1lIjoidW5pdHMtYXBpLTdjNzhjNWQ2NGMtNDg3amwiLCJ1aWQiOiI0NjE3OWMwZS1lNDYzLTRiY2UtYjRiNC0yYTZkMDI0NGUzYTYifSwic2VydmljZWFjY291bnQiOnsibmFtZSI6InVuaXRzLWFwaS1zYSIsInVpZCI6ImQxMzZiMGI3LTRhZjktNDcxYi05M2MyLTdiMDUzMTRjN2MyMyJ9LCJ3YXJuYWZ0ZXIiOjE3NzUxOTgyNzV9LCJuYmYiOjE3NzUxOTQ2NjgsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDp1bml0cy1hcGk6dW5pdHMtYXBpLXNhIn0.uMhxi9pAquD4lOd8HhrC7DOfH3QI1wr1zp7dKkFbqa351ykPKoVgBfJjVI2JnfooUXJHPgLzcXSeZ_R_vEO9f9Xuz6PPD93liS3tMi84G470CnxmB0-CZn77sWNcFpjAMCAWE8T2OUXklshld1iOtZCIcrp6ukhJwCM-bVM3UEjCg1EoON_iSWjfNSEIHDYykqlS7v-NCrex2KTzK_0bnT_xT6EYsv90V67J8GhopjdRedfyANCSu6VqZ2hgNEXq-CqdEWf2qpfQioGT3dm78Qd04UvC9hpiFTEuzrpmKencS3x3v125Rbstpe_vzI-f8cSYROfsV4JusDN3-Z96eA"
+  }'
+```
+
+
+
+
+
+
+
+
+
+
+
+---
 
 have better knowledge on - system design
 
@@ -46,189 +112,3 @@ https://bytebytego.com/guides/api-web-development/
 
 try to build micro services projects, ai projects (like book my show)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
----
-
-not a bug:
-
-# Why You See 2 Spans With the Same Trace ID
-
-The `finternet-app-server` acts as a **proxy**.
-
-For each request like:
-
-POST /api/v1/account/logout
-
-OpenTelemetry HTTP auto-instrumentation creates **two spans**.
-
----
-
-## Span Breakdown
-
-|#|Span Kind|What It Captures|Duration|
-|---|---|---|---|
-|1|**SERVER (incoming)**|Full Express request lifecycle|2993ms (includes middleware + proxy overhead)|
-|2|**CLIENT (outgoing)**|Proxied HTTP request to upstream `units` workflow API|2838ms (only upstream call)|
-
----
-
-## Why This Happens
-
-In:
-
-modules/proxy/src/services/proxy.service.ts:163-164
-
-req.url = req.originalUrl;  
-proxy.web(req, res);  // http-proxy makes an outgoing HTTP call → CLIENT span
-
-What happens:
-
-1. Incoming request hits Express → **SERVER span**
-    
-2. `http-proxy` makes an outgoing HTTP call → **CLIENT span**
-    
-3. Both are automatically instrumented
-    
-
-The HTTP instrumentation (enabled in `apps/server/src/config/otel.ts:90-102`) instruments:
-
-- Incoming HTTP requests
-    
-- Outgoing HTTP requests
-    
-
-So you get **two spans in the same trace**.
-
----
-
-## Why Both Spans Have the Same Name
-
-Both appear as:
-
-POST /api/v1/account/logout
-
-Because:
-
-- The **SERVER span** is renamed by  
-    `spanEnrichmentMiddleware` (`otel.middleware.ts:101-102`)
-    
-- The **CLIENT span** is renamed by  
-    `requestHook` (`otel.ts:95-100`)
-    
-
-The `requestHook` sees the path **before** the proxy’s `pathRewrite` strips `/api`.
-
-So both spans end up with identical names.
-
----
-
-# How to Confirm in HyperDX
-
-In HyperDX:
-
-1. Open the trace
-    
-2. Expand both spans
-    
-3. Check the `SpanKind` attribute
-    
-
-You should see:
-
-- `SERVER` (or value `1`)
-    
-- `CLIENT` (or value `2`)
-    
-
-That confirms the behavior.
-
----
-
-# If You Want to Suppress Client Spans
-
-You can filter outgoing requests in your HTTP instrumentation config.
-
-In:
-
-apps/server/src/config/otel.ts
-
-Add:
-
-'@opentelemetry/instrumentation-http': {  
-  ignoreOutgoingRequestHook: (request) => {  
-    // Skip spans for proxied requests to the account service  
-    const host = request.hostname || request.host || '';  
-    return host.includes('your-upstream-host');  
-  },  
-  requestHook: (span, request) => {  
-    // existing logic  
-  },  
-},
-
-This prevents client spans from being created for specific upstream hosts.
-
----
-
-# Should You Suppress It?
-
-Usually, **no**.
-
-Having both spans is valuable because it shows:
-
-2993ms (server)  
-- 2838ms (upstream)  
-= ~155ms proxy overhead
-
-That helps you identify whether latency is coming from:
-
-- Proxy/middleware layer  
-    or
-    
-- Upstream service
-
----
-
-
-* explore on kin (schema validator lib) whether it supports custom functions that can be executed (fun userExist)
-* if not we can use our own approach like add custom attribute in json schema so that have middleware which checks all the attributes and if custom attribute is present then checks for address
-
-```
-eg.
-
-/token/transact
-/parseEnvelope
-/validateUserToken
-/validateDevToken
-/validateRequest(schemaKey)
-/hash(fieldName, schemaKey) -> using (kin/openai3)(use better route name) which checks format key from spec and execute util function to check address, fieldName can be like payload.id or payload.identities[].id (use npm `jq` lib), transform it (i.e convert address to addressHash), updated the request value by finding from format key and update it in request
-/controller
-..
-..
-..
-```
-DefineStringFormatCallback
-subagents
-
-
-example-skills
-github
-playground, playwrote
-AskUserQuestionTool
-ralph
-!

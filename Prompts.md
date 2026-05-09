@@ -7,12 +7,3 @@ Interview me in detail using the AskUserQuestionTool about literally anything: t
 Interview me in detail using the AskUserQuestionTool about literally anything: technical implementation. but make sure the questions are not obvious. Be very in-depth (ask upto 5-10 questions)and continue interviewing me continually until it's complete, write the interviewed questions and summary progress at the same time to a file along with the plan in this folder /Users/naveenvhiremath/Downloads/claude-setup/plans with relevent filename.
 ```
 
-
-
-
-
-In units-api, while registering account we are creating did document in minio/gcs that should be removed
-
-  Interview me in detail using the AskUserQuestionTool about literally anything: technical implementation. but make sure the questions are not obvious. Be very in-depth (ask upto 5-10 questions)and
-  continue interviewing me continually until it's complete, write the interviewed questions and summary progress at the same time to a file along with the plan in this folder
-  /Users/naveenvhiremath/Downloads/claude-setup/plans with relevent filename.

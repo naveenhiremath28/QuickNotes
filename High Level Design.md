@@ -222,1067 +222,232 @@ Message Queue - https://studyalgorithms.com/system-design/message-queue-system-d
 
 ## CAP
 ```
-  
-what is partition tolerance
+================================================================
+   CAP THEOREM — DISTRIBUTED SYSTEMS (Beginner to Interview Ready)
+================================================================
 
-  
+----------------------------------------------------------------
+1. WHAT IS A SINGLE SYSTEM?
+----------------------------------------------------------------
+A system where ALL computation and data live on ONE machine.
 
-Partition tolerance is one of the three properties in the **CAP theorem** (Consistency, Availability, Partition tolerance) used in distributed systems.
+  User → Server → Database (all on same machine)
 
-### Simple definition
+  Pros:
+    - No network issues (everything is local)
+    - No data inconsistency (only one source of truth)
+    - Simple to manage — no synchronization needed
 
-**Partition tolerance** means a system continues to operate even if there is a **network failure that splits the system into parts (partitions)** that cannot communicate with each other.
+  Cons:
+    - Not scalable (bound by one machine's capacity)
+    - Single point of failure (crashes = everything down)
+    - Limited performance
 
----
+----------------------------------------------------------------
+2. WHAT IS A DISTRIBUTED SYSTEM?
+----------------------------------------------------------------
+A group of multiple computers (nodes) that work together and
+appear as a SINGLE system to the user.
 
-### What is a “partition”?
+  Instead of:   One powerful server handling everything
+  You have:     Many machines working together
 
+Real-world examples:
+  - Google Search, Amazon, Netflix
+  → You feel like it's one system
+  → But internally, hundreds/thousands of servers are involved
+
+WHY do we need distributed systems?
+  - Scalability    : Handle millions of users, add more machines
+  - Fault Tolerance: If one machine fails → others take over
+  - Performance    : Work divided across machines → faster
+
+COMPARISON:
+  ┌─────────────────┬───────────────────┬──────────────────────┐
+  │ Feature         │ Single System     │ Distributed System   │
+  ├─────────────────┼───────────────────┼──────────────────────┤
+  │ Machines        │ 1                 │ Multiple             │
+  │ Data            │ One place         │ Multiple nodes       │
+  │ Network issues  │ No                │ Yes                  │
+  │ Complexity      │ Low               │ High                 │
+  │ Scalability     │ Limited           │ High                 │
+  └─────────────────┴───────────────────┴──────────────────────┘
+
+KEY CHALLENGES in distributed systems:
+  - Network failures   : Machines can't talk to each other
+  - Latency            : Communication takes time
+  - Partial failures   : One node fails, others are fine
+  - Data inconsistency : Different nodes may have different data
+
+EXAMPLE:
+  You send a WhatsApp message → goes to Server A
+  Server B should also get it
+  But network breaks between A and B
+  → A has new message, B doesn't → system is INCONSISTENT
+
+This problem of network failure leads us to the CAP Theorem.
+
+----------------------------------------------------------------
+3. WHAT IS A NETWORK PARTITION?
+----------------------------------------------------------------
 A partition happens when:
-
-- Network links fail
-    
-- Nodes cannot talk to each other
-    
-- The system is split into isolated groups
-    
-
-Example:  
-Imagine a distributed database with servers in two data centers. If the connection between them breaks, you now have two **partitions**.
-
----
-
-### What partition tolerance guarantees
-
-If a system is partition-tolerant:
-
-- It **keeps running despite communication failures**
-    
-- Each partition can still process requests (depending on design)
-    
-
----
-
-### Trade-off (CAP theorem)
-
-When a partition happens, a system must choose between:
-
-- **Consistency (C):** all nodes see the same data
-    
-- **Availability (A):** every request gets a response
-    
-
-You **cannot guarantee both** during a partition.
-
-So systems choose:
-
-- **CP systems:** prioritize consistency, may reject requests
-    
-- **AP systems:** prioritize availability, may return stale data
-    
-
----
-
-### Quick analogy
-
-Think of a team split into two rooms with no communication:
-
-- Partition tolerance = both rooms keep working anyway
-    
-- But they might:
-    
-    - Stay consistent by stopping work until they reconnect (CP)
-        
-    - Or keep working independently but risk inconsistencies (AP)
-        
-
----
-
-If you want, I can give real-world examples (like MongoDB, Cassandra, etc.) to make it clearer.
-
-  
-
-why we cant have all 3
-
-  
-
-Short answer: **because of network failures (partitions), you’re forced to choose between consistency and availability—you can’t guarantee both at the same time.**
-
----
-
-### First, recall the three (CAP theorem)
-
-- **Consistency (C):** all nodes return the latest, same data
-    
-- **Availability (A):** every request gets a response
-    
-- **Partition Tolerance (P):** system keeps working despite network splits
-    
-
----
-
-### Why not all 3 together?
-
-The problem starts when a **partition happens** (and in real systems, it _will_ happen).
-
-Imagine this scenario:
-
-- You have 2 nodes: **Node A** and **Node B**
-    
-- Network breaks → they can’t talk to each other (partition)
-    
-- A user writes data to Node A
-    
-
-Now another user reads from Node B.
-
----
-
-### The conflict
-
-At this point, Node B has two choices:
-
-#### Option 1: Return old data
-
-- System is **available** (it responds)
-    
-- But data is **inconsistent**
-    
-
-👉 You chose **AP (Availability + Partition tolerance)**
-
----
-
-#### Option 2: Refuse the request
-
-- System is **consistent** (no wrong data shown)
-    
-- But not **available** (request fails)
-    
-
-👉 You chose **CP (Consistency + Partition tolerance)**
-
----
-
-### Why you can't have both C and A during partition
-
-Because:
-
-- Nodes **cannot coordinate** (network is broken)
-    
-- So they cannot ensure:
-    
-    - “latest data” (**Consistency**)
-        
-    - AND “always respond” (**Availability**)
-        
-
-At least one must be sacrificed.
-
----
-
-### Important insight
-
-- In real distributed systems, **Partition Tolerance is NOT optional**
-    
-- So the real choice is always:
-    
-
-👉 **Consistency vs Availability**
-
----
-
-### Intuition (very practical)
-
-Think of:
-
-- **Consistency = correctness**
-    
-- **Availability = responsiveness**
-    
-
-During a network split:
-
-- You can either **be correct**
-    
-- Or **be responsive**
-    
-- But not both, because communication is broken
-    
-
----
-
-### One-line takeaway
-
-👉 **You can’t have all 3 because when the network breaks, you must choose between giving a correct answer or giving any answer at all.**
-
----
-
-If you want, I can relate this to real systems like Cassandra vs PostgreSQL replication—those examples make it click instantly.
-
-  
-
-**Partition tolerance** means a system continues to operate even if there is a **network failure that splits the system into parts (partitions)** that cannot communicate with each other.
-
-this is availbulity right?
-
-  
-
-Good catch — it _sounds_ like availability, but it’s **not the same thing**. This confusion is very common 👍
-
----
-
-### 🔹 What you’re pointing at
-
-> “System continues to operate even if network splits”
-
-You’re thinking:  
-👉 _“That means it’s available, right?”_
-
----
-
-### 🔹 The subtle but important difference
-
-#### ✅ **Partition Tolerance (P)**
-
-- The system **survives network failures**
-    
-- It **keeps running as a whole system**
-    
-- It does **not guarantee every request succeeds**
-    
-
-👉 Focus: _system survives the split_
-
----
-
-#### ✅ **Availability (A)**
-
-- **Every request gets a response**
-    
-- Even if the response is wrong/stale
-    
-
-👉 Focus: _user always gets a reply_
-
----
-
-### 🔥 Key distinction
-
-During a partition:
-
-|Situation|Partition Tolerance|Availability|
-|---|---|---|
-|System doesn’t crash|✅|❓|
-|Every request gets response|❌ (not guaranteed)|✅|
-
----
-
-### ⚡ Example to make it click
-
-Network splits into A and B.
-
-- If system is **partition tolerant**:
-    
-    - Both sides keep running
-        
-    - But some requests may fail ❗
-        
-- If system is **available**:
-    
-    - Every request gets a response
-        
-    - Even if data is outdated ❗
-        
-
----
-
-### 🧠 Why they feel similar
-
-Because:
-
-- Both involve “system still working”
-    
-- But:
-    
-
-👉 **Partition tolerance = system-level survival**  
-👉 **Availability = request-level guarantee**
-
----
-
-### 💡 One-line clarity
-
-👉 Partition tolerance means _“system doesn’t break”_  
-👉 Availability means _“user never gets an error”_
-
----
-
-If you want, I can map this to real systems (like why Cassandra is AP and why some databases sacrifice availability) — that usually makes this distinction crystal clear.
-
-  
-
-give the proper notes for CAP theorem and examples explanation
-
-  
-
-Here are **clean, interview-ready notes** for the **CAP Theorem**, with clear explanations and real-world examples 👇
-
----
-
-# 🧠 CAP Theorem – Proper Notes
-
-### 📌 Definition
-
-The **CAP theorem** states that:
-
-> A distributed system can guarantee **at most 2 out of 3**:
-
-- **Consistency (C)**
-    
-- **Availability (A)**
-    
-- **Partition Tolerance (P)**
-    
-
----
-
-# 🔹 The Three Properties
-
-## 1. Consistency (C)
-
-- Every read returns the **latest written value**
-    
-- All nodes see the **same data at the same time**
-    
-
-👉 Similar to a **single database view**
-
----
-
-## 2. Availability (A)
-
-- Every request gets a **response**
-    
-- Response can be **success or failure**, but not timeout
-    
-
-👉 System is always responsive
-
----
-
-## 3. Partition Tolerance (P)
-
-- System continues to work even if:
-    
-    - Network fails
-        
-    - Nodes cannot communicate
-        
-
-👉 System survives **network splits**
-
----
-
-# ⚠️ Important Insight
-
-👉 In real-world distributed systems:  
-**Partition tolerance is mandatory**
-
-Because:
-
-- Networks **will fail**
-    
-- Distributed systems **must handle it**
-    
-
----
-
-# 🔥 The Real Trade-off
-
-When a partition happens:
-
-👉 You must choose between:
-
-- **Consistency (C)**
-    
-- **Availability (A)**
-    
-
----
-
-# 📊 CAP Combinations
-
-## 🟢 1. CP (Consistency + Partition Tolerance)
-
-- Prioritizes **correct data**
-    
-- May reject requests (reduced availability)
-    
-
-### ✔️ Behavior:
-
-- If data is uncertain → **fail the request**
-    
-
-### 📦 Examples:
-
-- HBase
-    
-- MongoDB
-    
-- Zookeeper
-    
-
-### 🧠 Use cases:
-
-- Banking systems
-    
-- Critical transactions
-    
-- Systems where **wrong data is unacceptable**
-    
-
----
-
-## 🟡 2. AP (Availability + Partition Tolerance)
-
-- Prioritizes **always responding**
-    
-- May return **stale or inconsistent data**
-    
-
-### ✔️ Behavior:
-
-- Always respond, even if data is outdated
-    
-
-### 📦 Examples:
-
-- Cassandra
-    
-- DynamoDB
-    
-- CouchDB
-    
-
-### 🧠 Use cases:
-
-- Social media feeds
-    
-- Product catalogs
-    
-- Systems where **availability > accuracy**
-    
-
----
-
-## 🔵 3. CA (Consistency + Availability)
-
-- Works only when **no partitions exist**
-    
-
-### ✔️ Behavior:
-
-- Always consistent and available
-    
-- But breaks during network failures
-    
-
-### 📦 Examples:
-
-- Traditional relational databases:
-    
-    - MySQL
-        
-    - PostgreSQL
-        
-
-### 🧠 Use cases:
-
-- Single-node systems
-    
-- Systems with **no network distribution**
-    
-
----
-
-# ⚡ Example Scenario (Very Important)
-
-### Setup:
-
-- Two nodes: A and B
-    
-- Network partition occurs
-    
-
----
-
-### Case 1: Choose Availability (AP)
-
-- A updates data
-    
-- B doesn’t know about it
-    
-- User reads from B → gets **old data**
-    
-
-👉 ✔ Available  
-👉 ❌ Not consistent
-
----
-
-### Case 2: Choose Consistency (CP)
-
-- A updates data
-    
-- B cannot verify latest state
-    
-- B **rejects read request**
-    
-
-👉 ✔ Consistent  
-👉 ❌ Not available
-
----
-
-# 🧠 Key Intuition
-
-👉 During partition:
-
-- Nodes **cannot communicate**
-    
-- So they cannot ensure:
-    
-    - “latest data” (Consistency)
-        
-    - AND “always respond” (Availability)
-        
-
----
-
-# 💡 One-line Summary
-
-👉 **You can’t have C + A during partition because nodes cannot coordinate.**
-
----
-
-# 🎯 Real-World Mapping
-
-|System Type|CAP Choice|Why|
-|---|---|---|
-|Banking|CP|Accuracy is critical|
-|Social media|AP|Availability matters more|
-|Single DB|CA|No partitions|
-
----
-
-# 🚀 Interview Tips
-
-- Always say:  
-    👉 “In real systems, P is mandatory, so we choose between C and A”
-    
-- Mention:
-    
-    - **CP → may fail requests**
-        
-    - **AP → may return stale data**
-        
-
----
-
-If you want, I can give a **diagram + memory trick** so you never forget CAP in interviews.
-
-  
-
-🔵 3. CA (Consistency + Availability) ------------------------------------- * Works only when **no partitions exist** ### ✔️ Behavior: * Always consistent and available * But breaks during network failures ### 📦 Examples: * Traditional relational databases: * MySQL * PostgreSQL ### 🧠 Use cases: * Single-node systems * Systems with **no network distribution**
-
-you said CA is not possible?
-
-  
-
-Great question — this is where most people get confused, so let’s clear it properly 👇
-
----
-
-# ❓ Is CA (Consistency + Availability) possible?
-
-### 👉 Short answer:
-
-**Yes — but only when there is NO partition.**  
-And in real distributed systems, partitions are unavoidable.
-
----
-
-# 🔹 Why people say “CA is not possible”
-
-When we talk about the **CAP theorem**, we assume:
-
-> 👉 The system is **distributed** and **network failures can happen**
-
-In that context:
-
-- Partition tolerance (**P**) becomes **mandatory**
-    
-- So the real choice becomes:  
-    👉 **C vs A**
-    
-
-That’s why people say:
-
-> ❌ “CA is not possible”  
-> What they really mean is:  
-> 👉 **“CA is not possible in the presence of partitions”**
-
----
-
-# 🔹 When CA _is_ possible
-
-CA works when:
-
-- There is **no network partition**
-    
-- System is:
-    
-    - Single-node OR
-        
-    - Perfectly reliable network (theoretical)
-        
-
-### 📦 Examples:
-
-- MySQL (single instance)
-    
-- PostgreSQL (single instance)
-    
-
-👉 In these:
-
-- Data is always consistent
-    
-- System always responds
-    
-
-✔ Consistency  
-✔ Availability  
-❌ No partition handling needed
-
----
-
-# 🔥 Why CA breaks in distributed systems
-
-Once you distribute:
-
-- Nodes can **lose connection**
-    
-- Now a partition happens
-    
-
-At that moment:
-
-- If you try to keep **C + A**
-    
-- You hit an impossible situation:
-    
-
-👉 Nodes cannot:
-
-- Agree on latest data (**Consistency**)
-    
-- AND respond to every request (**Availability**)
-    
-
-Because:  
-👉 **They cannot communicate**
-
----
-
-# 🧠 Clean mental model
-
-### Think like this:
-
-|Situation|Possible?|
-|---|---|
-|No partition|✅ CA possible|
-|Partition happens|❌ CA impossible|
-
----
-
-# 💡 Final clarity
-
-👉 CAP theorem is really about **what happens during failure**
-
-- Before failure → you can have CA
-    
-- During failure → you must choose CP or AP
-    
-
----
-
-# 🎯 One-line takeaway
-
-👉 **CA is possible only in ideal conditions, but CAP theorem focuses on failure scenarios where CA breaks.**
-
----
-
-If you want, I can give a **super simple diagram or story** that makes this 100% intuitive (the “two friends with phones” example is really good).
-
-  
-
-lets come from basics what is distributed systems, since I am beginner
-
-  
-
-Great, starting from basics is the right way 👍 — CAP makes much more sense once you understand distributed systems first.
-
----
-
-# 🧠 What is a Distributed System?
-
-### 📌 Definition
-
-A **distributed system** is:
-
-> A group of multiple computers (nodes) that work together and appear as a **single system** to the user.
-
----
-
-# 🔹 Simple Example
-
-Instead of:
-
-- One powerful server handling everything ❌
-    
-
-You have:
-
-- Many machines working together ✅
-    
-
----
-
-### 📦 Real-world examples:
-
-- Google Search
-    
-- Amazon
-    
-- Netflix
-    
-
-When you use them:  
-👉 You feel like it’s one system  
-👉 But internally, **hundreds/thousands of servers** are involved
-
----
-
-# 🔹 Why do we need Distributed Systems?
-
-## 1. Scalability 📈
-
-- Handle millions of users
-    
-- Add more machines instead of upgrading one
-    
-
-## 2. Fault Tolerance 🛠️
-
-- If one machine fails → others take over
-    
-
-## 3. Performance ⚡
-
-- Work is divided across machines → faster responses
-    
-
----
-
-# 🔹 Basic Components
-
-A distributed system usually has:
-
-- **Nodes (Servers)** → machines doing work
-    
-- **Network** → connects nodes
-    
-- **Communication** → APIs, RPC, messaging
-    
-
----
-
-# 🔥 Key Challenge (Very Important)
-
-Unlike a single system:
-
-👉 In distributed systems, **things can go wrong between machines**
-
----
-
-### Problems you face:
-
-## 1. Network failures 🌐
-
-- Machines can’t talk to each other
-    
-
-## 2. Latency ⏱️
-
-- Communication takes time
-    
-
-## 3. Partial failures ⚠️
-
-- One node fails, others are fine
-    
-
-## 4. Data inconsistency 🔄
-
-- Different nodes may have different data
-    
-
----
-
-# ⚡ Example to Understand
-
-Imagine WhatsApp-like system:
-
-- You send a message
-    
-- It goes to Server A
-    
-- Server B should also get it
-    
-
-But:
-
-- Network breaks between A and B
-    
-
-👉 Now:
-
-- A has new message
-    
-- B doesn’t
-    
-
-👉 System becomes **inconsistent**
-
----
-
-# 🔗 This leads to CAP Theorem
-
-Because of these problems, especially:
-
-👉 **Network failures (partitions)**
-
-We get the **CAP theorem**
-
----
-
-# 🧠 Core Idea
-
-In distributed systems:
-
-- You cannot assume network is reliable
-    
-- Nodes may not communicate
-    
-
-So you must decide:
-
-👉 Should system:
-
-- Always be correct (Consistency)?
-    
-- Always respond (Availability)?
-    
-
----
-
-# 💡 Simple Analogy
-
-Think of distributed system like:
-
-👥 A team working in different rooms
-
-- They communicate via phone (network)
-    
-- If phone breaks:
-    
-    - They may give wrong answers
-        
-    - Or stop answering
-        
-
-👉 That’s exactly the CAP problem
-
----
-
-# 🎯 One-line Summary
-
-👉 **Distributed system = multiple machines working together as one, but facing network-related challenges.**
-
----
-
-If you want, next step I can:
-
-- Build a **step-by-step bridge from distributed systems → CAP theorem (very intuitive)**
-    
-- Or explain with diagrams (super helpful for interviews)
-    
-
-  
-
-Unlike a single system:
-
-what is single system then
-
-  
-
-Got it — you’re asking what I meant by **“single system”** in contrast to distributed systems. Let’s make it very clear 👇
-
----
-
-# 🧠 What is a Single System?
-
-### 📌 Definition
-
-A **single system (non-distributed system)** is:
-
-> A system where **all computation and data live on one machine**
-
----
-
-# 🔹 Simple View
-
-Everything runs on:
-
-- One server (or one computer)
-    
-- One memory space
-    
-- One database instance
-    
-
-👉 No coordination between multiple machines
-
----
-
-# 🔹 Example
-
-Think of:
-
-- A local app running on your laptop
-    
-- A backend + database on one server
-    
-
-### 📦 Example tools:
-
-- MySQL
-    
-- PostgreSQL
-    
-
-If installed on one machine:  
-👉 That’s a **single system**
-
----
-
-# 🔹 How it works
-
-User → Server → Database (same machine)
-
-Everything is:
-
-- Local
-    
-- Fast
-    
-- No network dependency (internally)
-    
-
----
-
-# 🔥 Why it's simpler
-
-In a single system:
-
-## ✅ No network issues
-
-- No communication between machines
-    
-
-## ✅ No data inconsistency
-
-- Only one source of truth
-    
-
-## ✅ Easier to manage
-
-- No synchronization needed
-    
-
----
-
-# ⚠️ Limitations
-
-## ❌ Not scalable
-
-- Can’t handle massive traffic easily
-    
-
-## ❌ Single point of failure
-
-- If system crashes → everything down
-    
-
-## ❌ Limited performance
-
-- Bound by one machine’s capacity
-    
-
----
-
-# 🔄 Compare with Distributed System
-
-|Feature|Single System|Distributed System|
-|---|---|---|
-|Machines|1|Multiple|
-|Data|One place|Multiple nodes|
-|Network issues|❌|✅|
-|Complexity|Low|High|
-|Scalability|Limited|High|
-
----
-
-# 🧠 Key Intuition
-
-👉 Single system = **everything in one place**  
-👉 Distributed system = **spread across many machines**
-
----
-
-# 🔗 Why this matters for CAP
-
-- In a **single system**:  
-    👉 You can easily have **Consistency + Availability (CA)**
-    
-- In a **distributed system**:  
-    👉 Network issues introduce **Partition tolerance (P)**  
-    👉 Now you must choose **C vs A**
-    
-
----
-
-# 💡 One-line takeaway
-
-👉 **Single system = no network, no partition problem → simple and consistent**  
-👉 **Distributed system = network involved → complex trade-offs (CAP)**
-
----
-
-If you want, next I can show:  
-👉 how a single system evolves into a distributed one step-by-step (this makes CAP click instantly)
+  - Network links fail between nodes
+  - Nodes cannot talk to each other
+  - System is split into isolated groups
+
+Example:
+  Data center 1 ── (connection breaks) ── Data center 2
+  Now you have two partitions that can't communicate.
+
+----------------------------------------------------------------
+4. CAP THEOREM
+----------------------------------------------------------------
+A distributed system can guarantee AT MOST 2 out of 3:
+
+  C — Consistency
+  A — Availability
+  P — Partition Tolerance
+
+THE THREE PROPERTIES:
+
+  Consistency (C):
+    - Every read returns the LATEST written value
+    - All nodes see the SAME data at the same time
+    - Like a single database view — no stale data ever
+
+  Availability (A):
+    - Every request gets a RESPONSE
+    - Response can be success or failure, but NOT a timeout
+    - System is always responsive
+
+  Partition Tolerance (P):
+    - System continues to work even if network fails
+    - Nodes may lose connection — system keeps running
+    - Focus: system-level survival (not request-level guarantee)
+
+IMPORTANT DISTINCTION — P vs A:
+  ┌──────────────────────────────┬─────────────────────────────┐
+  │ Partition Tolerance          │ Availability                │
+  ├──────────────────────────────┼─────────────────────────────┤
+  │ System doesn't crash         │ Every request gets response │
+  │ System survives the split    │ User always gets a reply    │
+  │ Some requests may still fail │ Even if data is stale       │
+  └──────────────────────────────┴─────────────────────────────┘
+
+  P = system-level survival
+  A = request-level guarantee
+
+----------------------------------------------------------------
+5. WHY CAN'T WE HAVE ALL 3?
+----------------------------------------------------------------
+Because in real distributed systems, PARTITION TOLERANCE IS
+MANDATORY. Networks WILL fail. You cannot opt out of P.
+
+So the REAL choice is always:
+  → Consistency (C) vs Availability (A)
+
+WHEN A PARTITION HAPPENS — the conflict:
+
+  Setup: Two nodes A and B. Network breaks. User writes to A.
+         Another user reads from Node B.
+
+  Node B has two choices:
+
+  Option 1 — Return old data:
+    → System is AVAILABLE (it responds)
+    → But data is INCONSISTENT (stale)
+    → This is AP (Availability + Partition Tolerance)
+
+  Option 2 — Refuse the request:
+    → System is CONSISTENT (no wrong data shown)
+    → But NOT AVAILABLE (request fails)
+    → This is CP (Consistency + Partition Tolerance)
+
+  Nodes CANNOT coordinate (network is broken)
+  So they cannot ensure "latest data" AND "always respond"
+  At least one must be sacrificed.
+
+ONE-LINE TAKEAWAY:
+  You can't have all 3 because when the network breaks,
+  you must choose between giving a CORRECT answer
+  or giving ANY answer at all.
+
+----------------------------------------------------------------
+6. THE THREE CAP COMBINATIONS
+----------------------------------------------------------------
+
+CP — Consistency + Partition Tolerance
+  - Prioritizes CORRECT data
+  - May reject requests during partition (reduced availability)
+  - If data is uncertain → FAIL the request
+
+  Examples  : HBase, MongoDB, Zookeeper
+  Use cases : Banking systems, critical transactions,
+              systems where wrong data is unacceptable
+
+AP — Availability + Partition Tolerance
+  - Prioritizes ALWAYS RESPONDING
+  - May return stale or inconsistent data during partition
+  - Always respond, even if data is outdated
+
+  Examples  : Cassandra, DynamoDB, CouchDB
+  Use cases : Social media feeds, product catalogs,
+              systems where availability > accuracy
+
+CA — Consistency + Availability
+  - Works ONLY when there is NO partition
+  - Always consistent and available in normal conditions
+  - But BREAKS during network failures
+
+  Examples  : MySQL, PostgreSQL (single instance)
+  Use cases : Single-node systems, no network distribution
+
+  NOTE: CA is NOT possible in distributed systems.
+        The moment a partition happens, CA is impossible.
+        CA only exists in single-node / ideal conditions.
+        CAP theorem focuses on failure scenarios → CA breaks.
+
+  ┌──────────────┬────────────┬──────────────────────────────┐
+  │ System Type  │ CAP Choice │ Why                          │
+  ├──────────────┼────────────┼──────────────────────────────┤
+  │ Banking      │ CP         │ Accuracy is critical         │
+  │ Social media │ AP         │ Availability matters more    │
+  │ Single DB    │ CA         │ No partitions to worry about │
+  └──────────────┴────────────┴──────────────────────────────┘
+
+----------------------------------------------------------------
+7. EXAMPLE SCENARIO (Interview-Ready)
+----------------------------------------------------------------
+
+Setup:
+  Node A ── (network fails) ── Node B
+
+Case 1: Choose Availability (AP)
+  - A updates data
+  - B doesn't know about it
+  - User reads from B → gets OLD data
+  → Available ✓   |   Consistent ✗
+
+Case 2: Choose Consistency (CP)
+  - A updates data
+  - B cannot verify latest state
+  - B REJECTS the read request
+  → Consistent ✓   |   Available ✗
+
+----------------------------------------------------------------
+8. KEY INTUITION SUMMARY
+----------------------------------------------------------------
+
+  Partition tolerance = "system doesn't break"
+  Availability        = "user never gets an error"
+  Consistency         = "user always gets correct data"
+
+  Before partition → CA is possible
+  During partition → must choose CP or AP
+
+  In distributed systems → P is NOT optional
+  So real trade-off is always → C vs A
+================================================================
 ```
 
 
@@ -1423,3 +588,1094 @@ A common confusion — they're related but different:
 
 In practice, you often have both — the gateway routes to a service, and a load balancer behind it distributes across that service's instances.
 ```
+
+
+UniquId: https://www.youtube.com/watch?v=ogOKDhOa_cs&list=PLFdAYMIVJQHOWJgRrjv_RH-ng95B2h3ON&index=12
+
+
+Apr-13
+## Notification System
+
+```
+
+================================================================
+   SYSTEM DESIGN: NOTIFICATION SYSTEM (SMS, EMAIL & PUSH)
+================================================================
+
+----------------------------------------------------------------
+1. WHAT IS A NOTIFICATION SYSTEM?
+----------------------------------------------------------------
+A system that delivers messages/alerts to users across different
+channels — push, SMS, and email.
+
+Types of Notifications:
+  - Push Notifications : Sent to mobile devices (iOS / Android)
+                         Real-time alerts (reminders, updates)
+  - SMS                : Text messages via telecom providers
+                         Used for OTPs, alerts, marketing
+  - Email              : Rich content (images, banners, links)
+                         Used for promotions, newsletters
+
+----------------------------------------------------------------
+2. BASIC HIGH-LEVEL DESIGN
+----------------------------------------------------------------
+Your system does NOT deliver notifications directly.
+It delegates delivery to external third-party providers.
+
+FLOW:
+  Service (Producer) → Notification System → Third-party → User Device
+
+Third-party Providers by channel:
+  - Email : SMTP servers, SendGrid, Amazon SES
+  - SMS   : Telecom APIs
+  - Push  : APNS (Apple), FCM (Firebase/Android)
+
+PROBLEM with this basic design:
+  - Tight coupling between services
+  - No buffering — spikes can crash the system
+  - No retry handling on failure
+  - Not scalable
+
+----------------------------------------------------------------
+3. DATA GATHERING & STORAGE
+----------------------------------------------------------------
+To send notifications, you need user contact info and
+device tokens — collected and stored during user activity.
+
+DATA FLOW:
+  User → Load Balancer → API Servers → Database
+
+Data Models:
+
+  User Table:
+  ┌───────────┬────────────────┬───────┬─────────┬────────────┐
+  │  user_id  │     email      │ phone │ country │ created_at │
+  └───────────┴────────────────┴───────┴─────────┴────────────┘
+
+  Device Table:
+  ┌──────────────┬─────────┬───────────┐
+  │ device_token │ user_id │ last_used │
+  └──────────────┴─────────┴───────────┘
+
+Important Notes:
+  - Device tokens are dynamic — must be updated frequently
+  - One user can have multiple devices
+  - Store mapping: user ↔ multiple device tokens
+
+----------------------------------------------------------------
+4. IMPROVED HIGH-LEVEL ARCHITECTURE
+----------------------------------------------------------------
+Multiple services (orders, payments, reminders) all produce
+notification events. A central Notification System handles
+routing, formatting, and sending.
+
+FLOW:
+  Multiple Services → Notification System → Third-party → Devices
+
+Components:
+  1. Producer Services   : Any service generating events
+                           (Orders, Payments, Reminders)
+  2. Notification System : Core — handles routing, formatting,
+                           sending to right channel
+  3. Third-party Services: Email / SMS / Push providers
+  4. Clients             : Mobile devices, Web apps
+
+----------------------------------------------------------------
+5. IMPROVED DESIGN (With Queue + Workers + Retries)
+----------------------------------------------------------------
+Add separate queues per channel between the Notification Service
+and delivery workers to decouple, buffer, and enable retries.
+
+----------------------------------------------------------------
+IMPROVED DESIGN FLOW
+----------------------------------------------------------------
+
+  Service 1 ──┐
+  Service 2 ──┤
+  Service N ──┘
+              │
+              ▼
+   ┌──────────────────────────┐
+   │    Notification Service  │
+   │   Cache          DB      │
+   └──────────────────────────┘
+              │
+              ├──► Email Queue ──► Worker ──► Email Provider ──┐
+              │                                                 │
+              ├──► SMS Queue   ──► Worker ──► SMS Provider   ──┤──► Client
+              │                                                 │
+              ├──► Push Queue  ──► Worker ──► Push Provider  ──┘
+              │
+              └──► Slack Queue ──► Worker ──► Slack Provider ──► Client
+
+
+----------------------------------------------------------------
+RETRY FLOW (on delivery failure)
+----------------------------------------------------------------
+
+worker reads from queue
+
+  Worker ──► Third-party
+                 │
+            (fails ✗)
+                 │
+                 ▼
+          Retry Queue
+                 │
+                 ▼
+            Worker ──► Third-party
+                            │
+                       (success ✓)
+                            │
+                            ▼
+                          Client
+
+
+Cache stores:
+  - User preferences
+  - Device tokens
+  - Reduces repeated DB hits
+
+DB stores:
+  - User info
+  - Device info
+  - Notification history
+
+WHY MULTIPLE QUEUES?
+  - Each channel (Email, SMS, Push) has its own queue + worker
+  - One channel failing does NOT block others
+  - Each can scale independently based on load
+  - Retry is isolated — only failed messages are retried
+
+Improvements over basic design:
+  - Better scalability (workers scale independently)
+  - Fault isolation (one channel failure doesn't affect others)
+  - Faster processing (parallel queues)
+  - Retry handling on failure
+
+----------------------------------------------------------------
+6. GENERIC / PRODUCTION-READY DESIGN
+----------------------------------------------------------------
+Adds Authentication, Rate Limiting, Analytics, Notification
+Logs, and Templates on top of the improved design.
+
+FULL FLOW:
+
+  Service → Auth + Rate Limiter → Message Queue → Workers → Third-party → User
+                    │                   ▲               │
+              device/settings           │          Notification Logs
+              user_info (DB)       Analytics             │
+                 Cache              Service          Template DB
+
+Step by step:
+  1. Service sends a notification request
+  2. Auth verifies the service identity
+  3. Rate Limiter prevents spam / abuse / overload
+  4. Request buffered in Message Queue (handles traffic spikes)
+  5. Workers pick up from queue, apply Template, send to provider
+  6. Third-party delivers to user device
+  7. Delivery result logged in Notification Logs
+  8. Analytics Service tracks open / click / delivery rates
+
+Components Explained:
+
+  Authentication:
+    - Verify which service is sending the request
+    - Prevent unauthorized usage of notification system
+
+  Rate Limiter:
+    - Cap how many notifications a service can send
+    - Protect downstream systems from overload
+    - Prevent spam / abuse
+
+  Message Queue:
+    - Decouples producers from workers
+    - Absorbs traffic spikes without dropping requests
+    - Separate queues per channel (Email / SMS / Push)
+
+  Workers:
+    - Channel-specific (Email worker, SMS worker, Push worker)
+    - Fetch templates, format message, deliver via provider
+    - Handle retry logic on failure
+
+  Notification Logs:
+    - Stores delivery status, failures, retry attempts
+    - Used for debugging and auditing
+
+  Template Service:
+    - Predefined formats for each channel
+      e.g. Email HTML layout, SMS text format
+    - Dynamic placeholders: {{name}}, {{order_id}}
+
+  Analytics Service:
+    - Tracks delivery rate, open rate, click rate
+    - Feeds data back from third-party responses
+    - Provides insights for optimization and business decisions
+
+----------------------------------------------------------------
+FULL FLOW SUMMARY — ALL 3 DESIGNS
+----------------------------------------------------------------
+
+BASIC:
+  Producer → Notification System → Third-party → User
+
+
+
+----------------------------------------------------------------
+IMPROVED DESIGN
+----------------------------------------------------------------
+
+  Service 1 ──┐
+  Service 2 ──┤
+  Service N ──┘
+              │
+              ▼
+   ┌─────────────────────┐
+   │  Notification Service│
+   │   ┌──────┐ ┌──────┐ │
+   │   │Cache │ │  DB  │ │
+   │   └──────┘ └──────┘ │
+   └─────────────────────┘
+              │
+              ├──► Email Queue ──► Email Worker ──► Email Provider ──┐
+              │                         │                             │
+              ├──► SMS Queue   ──► SMS Worker   ──► SMS Provider   ──┤──► User
+              │                         │                             │
+              ├──► Push Queue  ──► Push Worker  ──► Push Provider  ──┘
+              │                         │
+              │                    (on failure)
+              │                         │
+              └─────────────────► Retry Queue
+                                        │
+                                        ▼
+                                  Worker retries
+
+
+
+
+----------------------------------------------------------------
+PRODUCTION (Generic) DESIGN
+----------------------------------------------------------------
+
+  Service
+     │
+     ▼
+  Auth + Rate Limiter ──────────────► Analytics Service
+     │                                       ▲
+     │                                       │
+     ▼                                       │
+  Message Queue                        (tracks results)
+     │                                       │
+     ▼                                       │
+  Workers ──► Template Service               │
+     │             (formats message)         │
+     │                                       │
+     ├──► Email Provider ──┐                 │
+     ├──► SMS Provider   ──┤──► User ────────┘
+     └──► Push Provider  ──┘
+     │
+     ▼
+  Notification Logs
+  (delivery status, failures, retries)
+     │
+     ▼
+  DB + Cache
+  (user info, device tokens, preferences)
+  
+  
+
+----------------------------------------------------------------
+COMPONENT SUMMARY TABLE
+----------------------------------------------------------------
+  Component           Purpose
+  ─────────────────── ─────────────────────────────────────────
+  Auth                Verify sender identity
+  Rate Limiter        Prevent spam, protect from overload
+  Message Queue       Buffer requests, smooth traffic spikes
+  Workers             Process & deliver per channel
+  Cache (Redis)       Store tokens/preferences, reduce DB load
+  Database            Persist users, devices, history
+  Notification Logs   Track delivery status & failures
+  Template Service    Reusable message formats with placeholders
+  Analytics Service   Measure delivery, open, click rates
+  Third-party         APNS, FCM, SendGrid, Twilio etc.
+
+================================================================
+
+```
+
+
+
+## DROPBOX / CLOUD STORAGE (Google Drive, OneDrive)
+
+```md
+================================================================
+   SYSTEM DESIGN: DROPBOX / CLOUD STORAGE (Google Drive, OneDrive)
+================================================================
+
+----------------------------------------------------------------
+1. WHAT IS A SERVICE LIKE DROPBOX?
+----------------------------------------------------------------
+A cloud storage service that lets users store, sync, and share
+files across multiple devices.
+Examples: Dropbox, Google Drive, OneDrive
+
+Client (Mobile) ⟷ Cloud Service ⟷ Client (Desktop)
+
+Advantages:
+  - Availability   : Data accessible anywhere with internet
+  - Reliability    : Data secured and stays on cloud
+  - Scalability    : Storage expands/reduces as needed
+
+----------------------------------------------------------------
+2. REQUIREMENTS & CONSIDERATIONS
+----------------------------------------------------------------
+Functional:
+  - Users can upload & download from all configured clients
+  - Users can share files with others
+  - Offline editing of files
+  - Synchronize files across different clients
+
+Non-Functional:
+  - Versioning: Restore previous versions of files
+  - Premium subscriptions with more features
+  - Very heavy on bandwidth (high uploads/downloads)
+
+----------------------------------------------------------------
+3. SCALE OF THE SYSTEM
+----------------------------------------------------------------
+  Total Users      : 500 million
+  Active Users     : 100 million
+  Devices per User : 3 (average)
+  Files per User   : 200 (average)
+
+  Total Files    => 200 × 500M         = 100 Billion files
+  Total Storage  => 100B × 100 KB      = 10 Petabytes (PB)
+
+----------------------------------------------------------------
+HIGH LEVEL DESIGN
+----------------------------------------------------------------
+
+                        ┌──────────────────┐
+                        │   Block Server   │──────────────────┐
+                        └──────────────────┘                  │
+                               ▲        |                     │
+                               │        |                     ▼
+  Clients ─────────────────────┤        |           ┌──────────────────┐
+  (Mobile + Desktop)           │        |           │  Backend Storage │
+        ▲                      │        |           │    (Amazon S3)   │
+        │                      ▼        |__________ └──────────────────┘
+        │               ┌──────────────────┐       |           
+        │               │  Metadata Server │───────▼──────────|
+        │               └──────────────────┘                  │
+        │                      │    │                         ▼
+        │                      │    └──────────────► ┌──────────────────┐
+        │                      │                     │ Metadata Storage │
+        │                      ▼                     └──────────────────┘
+        │               ┌──────────────────┐
+        └───────────────│   Sync Server    │
+          (notifies     └──────────────────┘
+           on change)
+
+Components:
+  - Block Server      : Handles file uploads, splits into blocks
+  - Metadata Server   : Manages file info (name, size, owner, etc.)
+                        Talks to both Backend Storage & Metadata Storage
+  - Sync Server       : Notifies clients when files change
+  - Backend Storage   : Blob/object store (Amazon S3) — actual file data
+  - Metadata Storage  : Database for file metadata
+
+----------------------------------------------------------------
+5. UPLOADING FILES
+----------------------------------------------------------------
+
+Step 1 — Client requests upload:
+  Client → Load Balancer → Block Server (Auth + Rate Limiter)
+
+Step 2 — Block Server issues presigned URL:
+  Block Server → presigned URL → Client
+
+Step 3 — Client uploads directly, metadata updated:
+  Client → (presigned URL) → Amazon S3 → upload complete → Metadata DB
+
+  NOTE: Client uploads DIRECTLY to S3 using presigned URL.
+        Large file data never passes through app servers.
+        Saves bandwidth + improves performance.
+
+----------------------------------------------------------------
+6. DOWNLOADING FILES
+----------------------------------------------------------------
+
+Step 1 — Client requests file:
+  Client → Load Balancer → Block Server (Auth + Rate Limiter) → Metadata DB
+
+Step 2 — File is served:
+  Amazon S3 → (caches hot files) → CDN → Client
+
+  NOTE: CDN caches frequently accessed files at edge locations.
+        Reduces latency for users + reduces load on S3.
+
+----------------------------------------------------------------
+7. SHARING FILES
+----------------------------------------------------------------
+No separate system needed. A "sharelist" field is added to the
+file's metadata record with IDs of users who can access it.
+
+Before sharing:                 After sharing:
+{                               {
+  "id": "123",                    "id": "123",
+  "name": "file.txt",             "name": "file.txt",
+  "size": 1000,                   "size": 1000,
+  "mimeType": "text/plain",       "mimeType": "text/plain",
+  "uploadedBy": "user1"           "uploadedBy": "user1",
+}                                 "sharelist": ["user2","user3"]
+                                }
+                                
+
+----------------------------------------------------------------
+8. SYNCING FILES
+----------------------------------------------------------------
+When one client uploads/edits a file, all other clients of that
+same user must be notified and updated automatically.
+
+HOW IT WORKS:
+
+  Each client sends changes to a shared Request Queue.
+  The Sync Server reads from that queue and updates Metadata.
+  Each client has its OWN Individual Response Queue to receive
+  updates — so notifications are isolated per device.
+
+FLOW:
+
+  Client (Device 1) ──┐
+  Client (Device 2) ──┼──► Request Queue ──► Sync Server ──► Metadata Storage
+  Client (Device 3) ──┘                           │
+	                                              │ pushes updates
+                                                  ▼
+                              ┌─────────────────────────────────┐
+                              │   Individual Response Queues    │
+                              │   [Queue A] ──► Device 1(laptop)│
+                              │   [Queue B] ──► Device 2(mobile)│
+                              │   [Queue C] ──► Device 3(tab)   │
+                              └─────────────────────────────────┘
+
+WHY INDIVIDUAL RESPONSE QUEUES?
+  - If one shared queue was used for responses, all clients would
+    receive ALL notifications — even ones not meant for them.
+  - Each device gets only its own relevant updates.
+  - Decouples clients — one slow client doesn't block others.
+
+KEY POINTS:
+  - Sync Server is the brain — coordinates what changed & who
+    needs to know.
+  - Metadata Storage is updated first, then clients are notified.
+  - Uses async messaging (queue-based) — not direct connection —
+    so the system stays reliable even if a client is offline.
+
+----------------------------------------------------------------
+9. FULL PICTURE (Complete Architecture)
+----------------------------------------------------------------
+Putting everything together — Upload, Download, and Sync
+all happening through one unified architecture.
+
+FULL ARCHITECTURE FLOW:
+
+                          Amazon S3 (Blob Storage)
+                          ▲              │
+    upload via            │              │ upload
+    presigned URL ────────┘              │ complete
+                                         ▼
+  Clients ──► Load Balancer ──► Application Server ──► Metadata Storage
+    │              │             (Auth + Rate Limiter)       ▲
+    │              │                                         │
+    │         Message Queue ◄──► Synchronization Server ────-┘
+    │         ┌──────────────┐
+    │         │ Request Queue│ (client → server)
+    │         │Response Queue│ (server → client)
+    │         └──────────────┘
+    │
+    ▼
+   CDN (download via cache)
+    │
+    ▼
+  Client receives file
+
+----------------------------------------------------------------
+FULL FLOW SUMMARY — ALL 3 OPERATIONS
+----------------------------------------------------------------
+
+UPLOAD:
+  Client → LB → App Server (Auth + Rate Limit)
+                     │
+                     └──► presigned URL → Client
+                                           │
+                                           ▼
+                                       Amazon S3 → Metadata Storage
+
+DOWNLOAD:
+  Client → LB → App Server → Metadata Storage + Amazon S3
+                                        │
+                                    CDN (caches hot files)
+                                        │
+                                        ▼
+                                      Client
+
+SYNC (notify other devices):
+  App Server → Sync Server ◄──► Message Queue ──► Client(s)
+                    │
+                    ▼
+             Metadata Storage (updated first, then push to queues)
+
+----------------------------------------------------------------
+COMPONENTS SUMMARY
+----------------------------------------------------------------
+  Load Balancer       : Distributes incoming requests evenly
+  Application Server  : Auth, Rate Limiting, business logic
+  Amazon S3           : Stores actual file data (blob storage)
+  Metadata Storage    : Stores file info (name, size, owner, etc.)
+  Sync Server         : Coordinates file change notifications
+  Message Queue       : Async communication between components
+    - Request Queue   : Client changes going TO the server
+    - Response Queue  : Server updates coming BACK to each client
+  CDN                 : Caches frequently downloaded files at edge
+
+================================================================
+```
+
+
+## NEWSFEED (Facebook, Instagram, Reddit Timeline)
+```
+================================================================
+   SYSTEM DESIGN: NEWSFEED (Facebook, Instagram, Reddit Timeline)
+================================================================
+
+----------------------------------------------------------------
+1. REQUIREMENTS & CONSIDERATIONS
+----------------------------------------------------------------
+Functional:
+  - Available on both mobile and web
+  - Publish updates and push to friends (most important feature)
+  - Updates should appear in near real-time
+  - Posts shown in reverse chronological order (newest first)
+
+Clarifying Questions to Ask:
+  - What traffic volume is expected?
+  - What is the maximum number of friends a user can have?
+  - What do posts contain? (Images / Text / Video)
+
+----------------------------------------------------------------
+2. IDEA OF THE SYSTEM (High Level)
+----------------------------------------------------------------
+User publishes a post → system fans it out to all friends' feeds.
+User opens app → system fetches their pre-built or fresh feed.
+
+FLOW:
+
+  User (Client)
+       │
+       ▼
+  Load Balancer
+       │
+       ▼
+  Web Servers (Auth + Proxy + Rate Limiter)
+       │
+       ├──► Post Service      ──► Post Cache ──► Post DB
+       │
+       ├──► Fanout Service    ◄──► News Feed Cache
+       │
+       └──► Notification Service
+
+Components:
+  - Post Service       : Handles creating/storing new posts
+  - Post Cache         : Fast access to recent posts
+  - Post DB            : Persistent storage for all posts
+  - Fanout Service     : Distributes post to all friends' feeds
+  - News Feed Cache    : Stores pre-built feeds per user
+  - Notification Svc   : Alerts friends of new posts
+
+----------------------------------------------------------------
+3. FANOUT SERVICE — TWO MODELS
+----------------------------------------------------------------
+Fanout = pushing one user's post to all their friends' feeds.
+
+  FANOUT ON WRITE (Push Model)
+  ─────────────────────────────
+  News Feed cache is pre-populated at write time.
+  When user posts → immediately pushed to all friends' caches.
+
+  + Feed is generated in real-time, pushed immediately
+  + Fetching news feed is fast (pre-computed, ready to read)
+
+  - If user has many friends, generating feed gets very slow
+  - Wastes resources for inactive users (pushed but never read)
+
+  FANOUT ON READ (Pull Model)
+  ─────────────────────────────
+  News Feed cache is populated when user opens the app.
+  Feed is built fresh on each read request.
+
+  + Works better for inactive users (only built when needed)
+  + Data is not pushed to everyone — saves bandwidth
+
+  - Process is slow (built on demand)
+  - User can have a bad experience (loading delay)
+
+  BEST PRACTICE:
+  Use a hybrid — Push model for regular users,
+                  Pull model for users with many followers
+                  or inactive users.
+
+----------------------------------------------------------------
+4. DESIGN OF THE FANOUT SERVICE
+----------------------------------------------------------------
+Step-by-step flow when a user publishes a post:
+
+  Fanout Service
+       │
+       ├──(1)──► Graph Database
+       │          (fetch list of all friends of the poster)
+       │
+       │    Graph DB ──(2)──► User Cache ◄──► User DB
+       │                      (get device tokens, settings)
+       │
+       ├──(3)──► Message Queue
+       │          (queue tasks for each friend)
+       │
+       ▼
+  (4) Fanout Workers
+       │
+       └──(5)──► Newsfeed Cache
+                  (write post_id + user_id into each friend's feed)
+
+Step by step explained:
+  1. Fanout Service queries Graph DB to get all friends
+  2. Graph DB returns friend list → look up user info from
+     User Cache / User DB (tokens, preferences)
+  3. Push fan-out tasks into Message Queue (one per friend)
+  4. Fanout Workers pick up tasks from queue
+  5. Workers write {post_id, user_id} entry into Newsfeed Cache
+     for each friend
+
+Newsfeed Cache stores:
+  ┌─────────┬─────────┐
+  │ post_id │ user_id │
+  ├─────────┼─────────┤
+  │ post_id │ user_id │
+  │ post_id │ user_id │
+  │ post_id │ user_id │
+  └─────────┴─────────┘
+  (a list of post IDs mapped to the user they belong to)
+
+NOTE: Cache stores only IDs, not full post content.
+      Actual post data fetched from Post DB when user reads feed.
+
+----------------------------------------------------------------
+5. RETRIEVING / UPDATING POSTS
+----------------------------------------------------------------
+When user opens the app and wants to read their feed:
+
+  Client sends GET request
+       │
+       ▼
+  Web Server → Fanout Service → Newsfeed Cache
+                                     │
+                                     │ (get list of post_ids)
+                                     ▼
+                                Post DB / Post Cache
+                                     │
+                                     │ (fetch actual post content)
+                                     ▼
+                                  Client (feed displayed)
+
+When user creates a new post:
+
+  Client sends POST request
+       │
+       ▼
+  Web Server → Post Service → Post Cache → Post DB
+                    │
+                    ▼
+              Fanout Service → (fans out to all friends as above)
+
+----------------------------------------------------------------
+6. FULL PICTURE (Complete Architecture)
+----------------------------------------------------------------
+
+  User
+   │
+   ├── GET (read feed) ◄─────────────────────────────┐
+   └── POST (publish)                                 │
+         │                                            │
+         ▼                                            │
+   Load Balancer                                      │
+         │                                            │
+         ▼                                   Newsfeed Cache
+   Web Servers                                (pre-built feeds)
+   (Auth + Proxy + Rate Limiter)                      ▲
+         │                                            │
+         ├──► Post Service ──► Post Cache ──► Post DB │
+         │                                            │
+         ├──► Fanout Service ──► Message Queue ──► Fanout Workers
+         │          │                                 │
+         │     Graph DB                               │
+         │    User Cache ◄──► User DB          Newsfeed Cache
+         │
+         └──► Notification Service ──► Friends notified
+
+----------------------------------------------------------------
+COMPONENT SUMMARY
+----------------------------------------------------------------
+  Component            Purpose
+  ──────────────────── ────────────────────────────────────────
+  Web Servers          Auth, Proxy, Rate Limiting
+  Post Service         Create and store new posts
+  Post Cache           Fast reads for recent posts
+  Post DB              Persistent post storage
+  Fanout Service       Distribute posts to all friends' feeds
+  Graph Database       Stores friend relationships
+  User Cache / DB      Stores user info and device tokens
+  Message Queue        Buffers fanout tasks per friend
+  Fanout Workers       Process queue, write to Newsfeed Cache
+  Newsfeed Cache       Pre-built feed (post_id + user_id pairs)
+  Notification Svc     Alerts friends when new post is published
+
+================================================================
+```
+
+
+
+## CONSISTENT HASHING
+
+```
+================================================================
+   WHY DO WE NEED MULTIPLE DATABASES?
+================================================================
+
+----------------------------------------------------------------
+START WITH ONE DATABASE
+----------------------------------------------------------------
+In the beginning, every system starts simple:
+
+  Client ◄──► Web Server ◄──► Single Database
+
+This works perfectly fine when:
+  - Users are few (hundreds or thousands)
+  - Data is small
+  - Traffic is low
+
+----------------------------------------------------------------
+WHAT HAPPENS WHEN YOUR APP GROWS?
+----------------------------------------------------------------
+Imagine you built an app like Instagram.
+
+Day 1   →      1,000 users   → one DB handles it fine
+Month 1 →    100,000 users   → DB getting slower
+Month 6 →  1,000,000 users   → DB struggling
+Year 1  → 10,000,000 users   → DB completely overwhelmed
+
+One database has LIMITS:
+  - Only one CPU
+  - Limited RAM
+  - Limited disk speed
+  - Can only handle X reads/writes per second
+
+----------------------------------------------------------------
+THE PROBLEMS WITH ONE DATABASE
+----------------------------------------------------------------
+
+1. PERFORMANCE
+  - Too many requests hit the same DB
+  - DB becomes a BOTTLENECK
+  - Every user experiences slowness
+  - Queries start timing out
+
+2. STORAGE LIMIT
+  - One machine has limited disk space
+  - You can't store infinite data on one server
+  - Example: Instagram stores billions of photos
+    → impossible on one machine
+
+3. SINGLE POINT OF FAILURE
+  - If that one DB goes down → entire app goes down
+  - No backup, no fallback
+  - Every user is affected immediately
+
+  Client ──► Web Server ──► DB (crashed) ✗
+                               ↑
+                          Everything stops
+
+4. GEOGRAPHIC LATENCY
+  - DB is in one location (say, US)
+  - User in India makes a request
+  - Data has to travel US → India every single time
+  - Very slow for international users
+
+----------------------------------------------------------------
+THE SOLUTION — MULTIPLE DATABASES
+----------------------------------------------------------------
+Spread the load, storage, and responsibility across many DBs.
+
+  Client ──► Web Server ──► DB [0]  (handles some users)
+                        ──► DB [1]  (handles some users)
+                        ──► DB [2]  (handles some users)
+
+Now:
+  - Each DB handles only a FRACTION of the total load
+  - Storage is split across machines
+  - If one DB fails → others still work
+  - Can place DBs in different regions (closer to users)
+
+----------------------------------------------------------------
+REAL WORLD NUMBERS
+----------------------------------------------------------------
+  Instagram  → billions of photos → needs 1000s of DB servers
+  WhatsApp   → 100B messages/day  → one DB would melt instantly
+  Amazon     → millions of orders → needs parallel DB processing
+
+----------------------------------------------------------------
+TYPES OF MULTIPLE DB SETUPS
+----------------------------------------------------------------
+
+Replication (copies):
+  Master DB ──► Slave DB [1]  (exact copy)
+            ──► Slave DB [2]  (exact copy)
+  - Reads spread across slaves
+  - Writes go to master
+  - If master fails → slave takes over
+
+Sharding (splitting):
+  DB [0] → stores users 0–33%
+  DB [1] → stores users 33–66%
+  DB [2] → stores users 66–100%
+  - Data is DIVIDED not copied
+  - Each DB owns a portion
+  - This is where consistent hashing comes in
+
+----------------------------------------------------------------
+SO THE CHAIN IS:
+----------------------------------------------------------------
+
+  App grows → one DB not enough
+      ↓
+  Need multiple DBs (sharding)
+      ↓
+  Need a way to decide which DB stores which data
+      ↓
+  Use hashing: event_id % no_of_servers
+      ↓
+  Servers added/removed → formula breaks, all data remaps
+      ↓
+  Need a smarter solution
+      ↓
+  CONSISTENT HASHING
+
+----------------------------------------------------------------
+ONE-LINE ANSWER
+----------------------------------------------------------------
+One database has limits on speed, storage, and reliability.
+As your app grows, you MUST split data across multiple databases.
+And once you have multiple DBs, you need a smart way to decide
+which data goes where — that's why consistent hashing exists.
+
+================================================================
+```
+
+```
+================================================================
+   SYSTEM DESIGN: CONSISTENT HASHING
+================================================================
+
+----------------------------------------------------------------
+1. THE PROBLEM — HOW TO DECIDE WHICH DATABASE?
+----------------------------------------------------------------
+When you have multiple databases, how do you decide which DB
+stores or retrieves a particular piece of data?
+
+Basic approach (Naive Hashing):
+  db_index = event_id % no_of_servers
+
+FLOW (basic setup):
+  Client ◄──► Web Servers ◄──► DB [0] / DB [1] / DB [2]
+
+Example with 3 servers:
+  1234 % 3 = 1  → goes to DB [1]
+  6666 % 3 = 0  → goes to DB [0]
+  5612 % 3 = 2  → goes to DB [2]
+
+This works fine — UNTIL you add or remove a server.
+
+----------------------------------------------------------------
+2. PROBLEM: REMOVING A DB
+----------------------------------------------------------------
+If DB [1] goes down, no_of_servers changes from 3 to 2.
+
+  db_index = event_id % no_of_servers
+
+  Before removal (3 servers):   After removal (2 servers):
+  6666 % 3 = 0 → DB [0]         6666 % 2 = 0 → DB [0]  (same)
+  1234 % 3 = 1 → DB [1]         1234 % 2 = 0 → DB [0]  (WRONG!)
+  5612 % 3 = 2 → DB [2]         5612 % 2 = 0 → DB [0]  (WRONG!)
+
+FLOW:
+  Client ◄──► Web Servers ──► DB [2]
+                          ──► DB [1] (REMOVED ✗)
+                          ──► DB [0]
+
+Problem:
+  - Almost ALL data mappings change
+  - System tries to find data in wrong DB
+  - Massive cache misses + data loss risk
+  - Every key needs to be remapped
+
+----------------------------------------------------------------
+3. PROBLEM: ADDING A NEW DB
+----------------------------------------------------------------
+If you add DB [3], no_of_servers changes from 3 to 4.
+
+  Before adding (3 servers):    After adding (4 servers):
+  6666 % 3 = 0 → DB [0]         6666 % 4 = 2 → DB [2]  (WRONG!)
+  1234 % 3 = 1 → DB [1]         1234 % 4 = 1 → DB [1]  (same)
+  5612 % 3 = 2 → DB [2]         5612 % 4 = 0 → DB [0]  (WRONG!)
+
+Problem:
+  - Adding one DB reshuffles most of the data
+  - Same massive remapping issue
+  - Not scalable
+
+ROOT CAUSE of both problems:
+  Naive hashing uses % no_of_servers
+  → any change in server count = almost full reshuffle
+
+----------------------------------------------------------------
+4. SOLUTION — CONSISTENT HASHING
+----------------------------------------------------------------
+Instead of hashing to a server index directly, we map both
+SERVERS and KEYS onto a fixed circular ring (hash ring).
+
+HOW THE RING WORKS:
+  - Ring has positions 0 to 99 (or 0 to 2^32 in real systems)
+  - Each DB is placed at a position on the ring using a hash
+  - Each key (event_id) is also hashed to a position on the ring
+  - Key goes to the FIRST DB found going CLOCKWISE from its position
+
+RING LAYOUT (example with 4 DBs):
+
+              DB [0]  (position ~0)
+           /                        \
+     (94) /                          \ (6)
+         /                            \
+   DB[2]                               DB[1]
+   (~75)                               (~25)
+         \                            /
+     (63) \                          / (37)
+           \                        /
+              DB [3]  (position ~50)
+
+Key assignment examples:
+  1234 % 100 = 34  → goes clockwise → hits DB [1] at ~25... 
+                      wait, 34 > 25, so next clockwise = DB [3] at 50
+  6666 % 100 = 66  → goes clockwise → hits DB [2] at 75
+  5612 % 100 = 12  → goes clockwise → hits DB [1] at 25
+
+RULE: Key always goes to the next DB clockwise on the ring.
+
+----------------------------------------------------------------
+5. REMOVING A DB WITH CONSISTENT HASHING
+----------------------------------------------------------------
+When DB [3] is removed from the ring:
+
+  BEFORE:                         AFTER:
+  Keys 26–50 → DB [3]             Keys 26–50 → DB [1]
+                                  (just move to next clockwise DB)
+
+  All other keys → UNCHANGED
+
+  DB [0] ──────── DB [0]
+  DB [1] ──────── DB [1]  ← absorbs DB[3]'s keys
+  DB [2] ──────── DB [2]
+  DB [3] ──────── REMOVED ✗
+
+Only the keys that WERE on DB [3] need to move.
+Everything else stays exactly where it is.
+
+----------------------------------------------------------------
+6. ADDING A NEW DB WITH CONSISTENT HASHING
+----------------------------------------------------------------
+When DB [4] is added between DB [1] and DB [3]:
+And DB [5] is added between DB [2] and DB [0]:
+
+  DB [4] placed at ~42 on ring
+    → Takes keys between 26–42 from DB [1]
+    → Only those keys move, rest unchanged
+
+  DB [5] placed at ~87 on ring
+    → Takes keys between 76–87 from DB [0]
+    → Only those keys move, rest unchanged
+
+Only the keys in the NEW DB's segment are affected.
+All other keys stay on their current DB.
+
+----------------------------------------------------------------
+7. VIRTUAL NODES
+----------------------------------------------------------------
+Problem with basic consistent hashing:
+  - DBs may get uneven key distribution
+  - One DB could get many more keys than others
+  - Not truly balanced
+
+Solution — Virtual Nodes:
+  - Each physical DB is represented by MULTIPLE positions on ring
+  - Each position = one virtual node
+
+RING WITH VIRTUAL NODES (each DB has 3 virtual spots):
+
+              DB [0]  (positions: 0, 94, ...)
+           /                                  \
+          /                                    \
+   DB[2]                                        DB[1]
+   (positions: 75, 63, ...)      (positions: 25, 31, ...)
+          \                                    /
+           \                                  /
+              DB [3]  (positions: 50, 42, ...)
+
+  Numbers inside ring = 0, 6, 12, 17, 25, 31, 37, 42,
+                        50, 56, 63, 69, 75, 81, 87, 94
+
+Virtual node labels around ring (which DB owns each slot):
+  Position 0  → DB[0]     Position 50 → DB[3]
+  Position 6  → DB[0]     Position 56 → DB[3]
+  Position 12 → DB[1]     Position 63 → DB[2]
+  Position 17 → DB[1]     Position 69 → DB[2]
+  Position 25 → DB[1]     Position 75 → DB[2]
+  Position 31 → DB[1]     Position 81 → DB[2]
+  Position 37 → DB[3]     Position 87 → DB[0]
+  Position 42 → DB[3]     Position 94 → DB[0]
+
+Benefits:
+  - Keys are distributed more evenly across all DBs
+  - When a DB is added/removed, its virtual nodes spread
+    the impact evenly across ALL other DBs (not just one neighbor)
+  - More virtual nodes = better balance
+
+----------------------------------------------------------------
+SUMMARY — NAIVE HASHING vs CONSISTENT HASHING
+----------------------------------------------------------------
+  ┌─────────────────────┬──────────────────┬──────────────────┐
+  │ Feature             │ Naive Hashing    │ Consistent Hash  │
+  ├─────────────────────┼──────────────────┼──────────────────┤
+  │ Formula             │ key % n_servers  │ Hash ring        │
+  │ Add server          │ Full reshuffle   │ Only 1 segment   │
+  │ Remove server       │ Full reshuffle   │ Only 1 segment   │
+  │ Keys remapped       │ Almost all       │ Minimal (1/n)    │
+  │ Balance             │ Even             │ Uneven (fix with │
+  │                     │                  │ virtual nodes)   │
+  └─────────────────────┴──────────────────┴──────────────────┘
+
+ONE-LINE TAKEAWAY:
+  Consistent hashing maps servers and keys onto a ring.
+  Adding/removing a server only affects its neighbouring keys —
+  not the entire dataset. Virtual nodes ensure even distribution.
+
+================================================================
+```
+

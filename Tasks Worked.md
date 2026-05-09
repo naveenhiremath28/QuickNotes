@@ -344,7 +344,7 @@
 
 3. Finternet & Opsight — Implemented the Workflow API layer, integrated workflow and engine services for token create and transact APIs, and contributed to the initial Opsight Production Monitoring Agent (UI and backend APIs).
 
-4. unQuery — Implemented end-to-end dataset management including connection testing, CRUD operations, bulk metadata creation, column selection, pre-canned query generation and integrated all APIs into UI with improved query handling, pagination and response rendering
+4. unQuery — Implemented end-to-end dataset management including connection testing, CRUD operations, bulk metadata creation, column selection, pre-cannexd query generation and integrated all APIs into UI with improved query handling, pagination and response rendering
 
 5. unQuery — Added PostgreSQL support, implemented CSV data ingestion with backend and UI integration, introduced query access control with daily limits and usage tracking, and delivered animated chat conversations with enhanced UI/UX across dashboard and dataset flows
 

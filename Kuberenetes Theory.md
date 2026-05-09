@@ -4709,3 +4709,115 @@ helm uninstall my-nginx -n production
 |`helm show values`|Display a chart's default values|
 |`helm package`|Package a chart directory into a .tgz|
 ```
+
+
+
+## helm templates 
+
+```
+## 🚫 Without `.tpl` (Repeating yourself 😫)
+
+You end up duplicating the same configuration across multiple files.
+
+**deployment.yaml**
+
+labels:  
+  app: myapp  
+  env: production
+
+**service.yaml**
+
+labels:  
+  app: myapp  
+  env: production
+
+**ingress.yaml**
+
+labels:  
+  app: myapp  
+  env: production
+
+👉 Problem:
+
+- Repetitive code
+- Hard to maintain
+- If something changes, you must update **every file**
+
+---
+
+## ✅ With `.tpl` (Write once, use everywhere)
+
+### Step 1 — Define labels once in `_helpers.tpl`
+
+{{- define "myapp.labels" -}}  
+app: myapp  
+env: production  
+{{- end }}
+
+---
+
+### Step 2 — Reuse in any template
+
+**deployment.yaml**
+
+labels:  
+  {{- include "myapp.labels" . | nindent 4 }}
+
+**service.yaml**
+
+labels:  
+  {{- include "myapp.labels" . | nindent 4 }}
+
+**ingress.yaml**
+
+labels:  
+  {{- include "myapp.labels" . | nindent 4 }}
+
+---
+
+### 📦 Output (Generated YAML)
+
+labels:  
+  app: myapp  
+  env: production
+
+---
+
+## 💡 Think of it like this
+
+A `.tpl` file is like a reusable function.
+
+// define once  
+function getLabels() {  
+  return {  
+    app: "myapp",  
+    env: "production"  
+  }  
+}  
+  
+// use anywhere  
+getLabels()  
+getLabels()  
+getLabels()
+
+👉 `_helpers.tpl` works the same way — but for Kubernetes YAML templates in Helm.
+
+---
+
+## 🚀 Why this matters
+
+- DRY (Don't Repeat Yourself)
+- Easier updates
+- Cleaner templates
+- Scales better for large Helm charts
+
+---
+
+### ✅ Key point
+
+- **Do NOT wrap everything in ```**
+- Only use triple backticks for **inner code blocks**
+- That’s why your screenshot renders correctly 👍
+```
+
+

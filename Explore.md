@@ -113,12 +113,12 @@ Only approved financial institutions can access it.
 
 # 🔎 Quick Comparison
 
-|Feature|Public API|Private API|Partner API|
-|---|---|---|---|
-|Audience|Anyone|Internal teams|Selected partners|
-|Documentation|Public|Internal only|Restricted|
-|Security Level|High|Internal network trust|Very High|
-|Example|Google Maps|Internal Auth Service|Bank ↔ Fintech|
+| Feature        | Public API  | Private API            | Partner API       |
+| -------------- | ----------- | ---------------------- | ----------------- |
+| Audience       | Anyone      | Internal teams         | Selected partners |
+| Documentation  | Public      | Internal only          | Restricted        |
+| Security Level | High        | Internal network trust | Very High         |
+| Example        | Google Maps | Internal Auth Service  | Bank ↔ Fintech    |
 
 ---
 ## Note:
@@ -989,3 +989,121 @@ Even if one node crashes:
 - **ACID** = Bank system (strict, safe)
 - **BASE** = Social media (fast, flexible)
 - **Distributed DB** = Global bank (safe + scalable)
+
+
+## Overrides in Node
+```
+The simplest possible explanation
+
+  Set the scene
+
+  Your app uses a logging library called HyperDX. HyperDX itself uses a chain of helper libraries:
+
+  HyperDX → OTel-detector → GCP-helper → gaxios → uuid
+
+  The problem: the uuid library at the very end has a security bug. It's fixed in version 14, but your app has version 9.
+
+  The intuition that's wrong
+
+  ▎ "Just install uuid@14 in my app's package.json — npm will use that everywhere, right?"
+
+  No, it won't. Here's why.
+
+  Think of node_modules like nested folders
+
+  When you install npm packages, they sit in folders inside folders, like this:
+
+  your-app/
+  ├── node_modules/
+  │   ├── hyperdx/
+  │   │   └── node_modules/
+  │   │       └── otel-detector/
+  │   │           └── node_modules/
+  │   │               └── gcp-helper/
+  │   │                   └── node_modules/
+  │   │                       └── gaxios/
+  │   │                           └── node_modules/
+  │   │                               └── uuid/  ← version 9 (THE BAD ONE)
+  │   └── uuid/  ← if you install at top-level, uuid@14 sits HERE
+
+  Now picture a gaxios file that says const uuid = require("uuid"). When Node looks for "uuid", it works like a person
+  searching for car keys:
+
+  ▎ "Did I leave them on this table? No.
+  ▎ How about the table one room over? No.
+  ▎ The kitchen table? Yes — found them!"
+
+  It starts in the closest folder and walks outward until it finds something. The moment it finds a uuid folder, it stops.
+
+  So when gaxios asks for "uuid":
+
+  1. Look in gaxios/node_modules/uuid/ → found! version 9. ✅ Stop.
+
+  It never even looks at the top-level your-app/node_modules/uuid/ where your shiny new uuid@14 is sitting. From gaxios's
+  perspective, your version-14 doesn't exist.
+
+  Why doesn't npm just merge them?
+
+  Sometimes npm does merge ("dedupe") and put a single copy at the top. But only when versions are compatible.
+
+  Each library declares what versions of its dependencies are acceptable. gaxios says:
+
+  ▎ "I need uuid version 9-something. Anything 9.0.1 or higher in the 9.x family is fine."
+
+  If you install uuid@9.5 at the top level, npm thinks: "great, 9.5 satisfies gaxios's request, I'll just use one copy." → One
+  uuid, dedupe happens, everyone shares.
+
+  If you install uuid@14 at the top level, npm thinks: "14 is not in the 9.x family, gaxios won't accept this." → Two copies,
+  gaxios keeps its own version 9.
+  uuid, dedupe happens, everyone shares.
+
+  If you install uuid@14 at the top level, npm thinks: "14 is not in the 9.x family, gaxios won't accept this." → Two copies,
+  gaxios keeps its own version 9.
+
+  Now extend the same logic up the whole chain
+
+  To get uuid@14 to actually be used by gaxios, you'd need gaxios to say "I'll accept uuid 14." The newer gaxios@7 does say
+  that — it dropped uuid entirely. Great, so install gaxios@7 at the top, right?
+
+  Same problem one level up:
+  - gcp-helper declares: "I need gaxios in the 6.x family."
+  - gaxios@7 isn't in 6.x → npm installs both → gcp-helper still uses gaxios@6 → which uses uuid@9.
+
+  And one level above that:
+  - otel-detector declares: "I need gcp-helper in the 6.x family."
+  - ...same problem...
+
+  And at the top:
+  - HyperDX declares: "I need otel-detector in the 0.56.x family."
+  - The fixed otel-detector is 0.74.x → outside 0.56.x → can't propagate.
+
+  Every link in the chain blocks the upgrade. You'd have to fix the topmost one (HyperDX) to widen its acceptance, and then
+  each lower one would naturally get newer versions.
+
+  So what can you do?
+
+  Three real options, each with a tradeoff:
+
+  1. overrides (the npm sledgehammer)
+
+  Tell npm: "I don't care what gaxios says it accepts. Force uuid@14 in there anyway."
+  It works. The downside is npm ls will say "this is technically invalid" — kind of like getting your car serviced with a part
+  the manual didn't bless. Probably fine, but a strict mechanic would frown.
+
+  2. Wait for HyperDX to update
+
+  HyperDX's maintainers ship a new version that accepts the newer detector. Then everything cascades naturally. No frowns from
+  npm. But you wait however long they take.
+
+  3. Stop using HyperDX
+
+  Replace the HyperDX library with the underlying OpenTelemetry libraries directly. Then you control the whole chain. But that
+  means editing your code (the two files where you require('@hyperdx/...')).
+
+  TL;DR
+
+  You can't fix uuid by adding it to your package.json because Node looks for libraries in the closest folder first, and
+  there's already an old uuid sitting in a closer folder than yours will ever be.
+
+  The only ways out are: force it (overrides), wait for upstream to bump, or remove the package that's blocking the chain.
+```

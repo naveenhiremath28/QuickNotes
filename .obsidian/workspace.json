@@ -8,63 +8,20 @@
         "type": "tabs",
         "children": [
           {
-            "id": "43720901d235ad2d",
+            "id": "8b8fd60ddbe1d068",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Golang.md",
+                "file": "Langchain/langchain.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Golang"
-            }
-          },
-          {
-            "id": "9837679b5498641b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Kafka.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Kafka"
-            }
-          },
-          {
-            "id": "8d0c6681f0f1acbf",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Browser Automation and How to control it.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Browser Automation and How to control it"
-            }
-          },
-          {
-            "id": "20600c416b43a375",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Finternet.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Finternet"
+              "title": "langchain"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -226,36 +183,46 @@
       "bases:Create new base": false
     }
   },
-  "active": "20600c416b43a375",
+  "active": "8b8fd60ddbe1d068",
   "lastOpenFiles": [
-    "Browser Automation and How to control it.md",
-    "Finternet.md",
-    "High Level Design.md",
+    "Langchain/langchain_note.md",
+    "Untitled 2.md",
+    "Langchain/langchain.md",
+    "Untitled",
     "Note.md",
-    "Explore.md",
-    "Note2.md",
-    "Kafka.md",
-    "Golang.md",
+    "Langchain/langchain",
+    "Langchain",
+    "mcp_server/MCP Note.md",
+    "mcp_server/MCP Handson + Theory.md",
+    "mcp_server/MODEL CONTEXT PROTOCOL (MCP) — COMPLETE STRUCTURED NOTES.md",
     "Prompts.md",
-    "K8S Roadmap.md",
-    "Kuberenetes Theory.md",
-    "lookup.md",
-    "Untitled.md",
-    "Low Level Design System Design.md",
-    "Tasks Worked.md",
-    "HELM COMMANDS.md",
-    "Kubernetes Handson Note.md",
-    "OTel Metrics.md",
-    "Dev Token and RBAC Implementation.md",
-    "KUBECTL COMMANDS.md",
-    "OAuth and Google OAuth.md",
+    "Note2.md",
+    "Vulnerabilities - Basics.md",
+    "Commands.md",
+    "Untitled 1.md 21-22-41-988.md",
+    "python/Asyncio, async and await.md",
+    "python",
+    "units-federation/03-workflows-explained.md",
+    "units-federation/00-anchor-explained.md",
+    "units-federation/02-token-runtime-explained.md",
+    "units-federation/01-ulip-protocol-explained.md",
+    "units-federation/00-anchor-part2-dependencies.md",
+    "units-federation/00-anchor-part1-overview.md",
+    "units-multi-instance/01-big-picture.md",
+    "units-multi-instance/02-build-order-slices.md",
+    "units-multi-instance",
+    "units-federation/03-the-8-sub-specs.md",
+    "units-federation/README.md",
+    "units-federation/02-what-this-doc-is.md",
+    "units-federation/01-big-picture.md",
+    "units-federation",
+    "units-multi-instance/03-the-8-sub-specs.md",
+    "mcp_server",
+    "Untitled.base",
+    "Untitled 1.base",
+    "Untitled.canvas",
     "Pasted image 20260131153415.png",
     "Screenshot 2026-03-29 at 7.27.04 PM.png",
-    "Blockchain.md",
-    "OPA (Open Policy Agent).md",
-    "Hashicorp Vault.md",
-    "Demo code.md",
-    "Commands.md",
     "Pasted image 20260131153859.png",
     "Pasted image 20260106150950.png",
     "Pasted image 20260106144823.png",

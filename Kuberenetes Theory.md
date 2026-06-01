@@ -4820,4 +4820,309 @@ getLabels()
 - That’s why your screenshot renders correctly 👍
 ```
 
+## HELM UMBRELLA CHART
 
+```
+================================================================
+   HELM UMBRELLA CHART — NOTES
+================================================================
+
+----------------------------------------------------------------
+1. WHAT IS A HELM UMBRELLA CHART?
+----------------------------------------------------------------
+A Helm chart whose only job is to BUNDLE other charts
+(its "subcharts") into ONE installable, upgradable, rollbackable
+release — managed by a SINGLE values file.
+
+  Core idea:
+    The umbrella deploys NOTHING by itself.
+    It groups child charts so they ship as one product.
+
+  Real-world analogy:
+    package.json   →  Chart.yaml
+    node_modules/  →  charts/
+    npm install    →  helm dependency update
+
+  Mental picture:
+    Umbrella = the box.
+    Subcharts = the items inside the box.
+    Helm release = the order you place for the whole box.
+
+----------------------------------------------------------------
+2. WHY DO WE NEED IT?
+----------------------------------------------------------------
+  ┌───────────────────────┬──────────────────────────────────┐
+  │ Problem               │ How umbrella solves it           │
+  ├───────────────────────┼──────────────────────────────────┤
+  │ Multi-service apps    │ Group api + ui + db as one unit  │
+  │ Atomic upgrades       │ One `helm upgrade` updates all   │
+  │ Atomic rollbacks      │ One revision number for all      │
+  │ Single tuning knob    │ One values.yaml controls all     │
+  │ Reuse external charts │ Pull bitnami/postgres as a dep   │
+  │ Env-specific configs  │ values-dev / staging / prod      │
+  └───────────────────────┴──────────────────────────────────┘
+
+  Without umbrella:
+    3 charts → 3 installs → 3 upgrades → 3 rollbacks
+    (rollback nightmare if only 2 of 3 succeed)
+
+  With umbrella:
+    1 release name → 1 history → 1 atomic transaction.
+
+----------------------------------------------------------------
+3. HOW DOES IT WORK? (3 LAYERS — DETAILED)
+----------------------------------------------------------------
+
+  ┌─────────────────────────────────────────┐
+  │  Layer 3:  values.yaml overrides        │  ← what you tune
+  ├─────────────────────────────────────────┤
+  │  Layer 2:  Umbrella chart (parent)      │  ← coordinator
+  ├─────────────────────────────────────────┤
+  │  Layer 1:  Subcharts in charts/         │  ← actual workloads
+  ├─────────────────────────────────────────┤
+  │  Kubernetes API                         │
+  └─────────────────────────────────────────┘
+
+  ............................................................
+  LAYER 1 — SUBCHARTS (the workers)
+  ............................................................
+  Each subchart is a COMPLETE chart on its own:
+    Chart.yaml + values.yaml + templates/
+
+  Two ways a subchart ends up under charts/:
+
+    (a) BUNDLED  → you wrote it, lives at charts/foo/
+                   versioned with the umbrella
+                   (use this for your own services)
+
+    (b) DEPENDENCY → declared in Chart.yaml, fetched
+                     by `helm dependency update`
+                     (use this for external charts)
+
+  Example Chart.yaml dependency block:
+
+      dependencies:
+        - name: postgresql
+          version: 15.5.0
+          repository: https://charts.bitnami.com/bitnami
+          condition: postgresql.enabled
+
+  After `helm dep update`:
+      charts/postgresql-15.5.0.tgz  ← downloaded
+      Chart.lock                     ← pins exact version
+
+  ............................................................
+  LAYER 2 — THE UMBRELLA (the coordinator)
+  ............................................................
+  Looks like a normal chart, but its templates/ folder is
+  USUALLY only for things that CROSS subcharts:
+    - Ingress (one host fronts api + ui)
+    - Migration Job (touches the shared DB)
+    - NetworkPolicies that span services
+    - Common labels via _helpers.tpl
+
+  Skeleton:
+      unquery/
+      ├── Chart.yaml          ← lists deps + version
+      ├── values.yaml         ← overrides for everything
+      ├── charts/             ← children live here
+      │   ├── unquery-api/
+      │   ├── unquery-ui/
+      │   └── postgresql/     ← from dep
+      └── templates/          ← cross-cutting only
+          ├── ingress.yaml
+          └── migration-job.yaml
+
+  ............................................................
+  LAYER 3 — VALUES OVERRIDES (what you actually edit)
+  ............................................................
+  Subchart defaults can be overridden from the parent
+  by using the SUBCHART NAME as the top-level key.
+
+  Subchart's own defaults (charts/unquery-api/values.yaml):
+      replicaCount: 1
+      image:
+        tag: "latest"
+
+  Parent overrides them (unquery/values.yaml):
+      unquery-api:              ← key MUST match subchart name
+        replicaCount: 3
+        image:
+          tag: "v1.2.3"
+
+      postgresql:               ← matches dep name
+        auth:
+          database: obsrv
+
+  → Final value seen by subchart: replicaCount = 3
+
+  THIS is the umbrella superpower:
+    one file controls the whole stack.
+
+----------------------------------------------------------------
+4. SUBCHART RESOLUTION — WHERE CHILDREN COME FROM
+----------------------------------------------------------------
+  ┌────────────────┬─────────────────────────────────────────┐
+  │ Source         │ How to add it                           │
+  ├────────────────┼─────────────────────────────────────────┤
+  │ You wrote it   │ Drop folder into charts/                │
+  │ (bundled)      │ Versioned with the umbrella in git      │
+  ├────────────────┼─────────────────────────────────────────┤
+  │ Public chart   │ Add to dependencies: in Chart.yaml      │
+  │ (dep)          │ Run `helm dependency update`            │
+  │                │ → downloads .tgz into charts/           │
+  ├────────────────┼─────────────────────────────────────────┤
+  │ Local path     │ dependencies: with repository: file://  │
+  │ (rare)         │ Useful inside a monorepo                │
+  └────────────────┴─────────────────────────────────────────┘
+
+  Useful commands:
+      helm dependency update   → fetch & lock
+      helm dependency list     → see what's declared
+      helm dependency build    → install from Chart.lock
+
+----------------------------------------------------------------
+5. VALUES OVERRIDE FLOW (THE ONE GOTCHA EVERYONE HITS)
+----------------------------------------------------------------
+  Order of precedence (later wins):
+
+      1. subchart's own values.yaml          (defaults)
+      2. parent values.yaml (key = subchart) (override)
+      3. -f extra-values.yaml on CLI         (env overlay)
+      4. --set on CLI                        (one-off)
+
+  Visual:
+
+      charts/unquery-api/values.yaml
+              │
+              │  replicaCount: 1
+              ▼
+      unquery/values.yaml
+              │  unquery-api:
+              │    replicaCount: 3       ← overrides to 3
+              ▼
+      values-prod.yaml   (-f at install)
+              │  unquery-api:
+              │    replicaCount: 10      ← overrides to 10
+              ▼
+      --set unquery-api.replicaCount=20  ← final = 20
+
+  GLOBAL values (shared across ALL subcharts):
+      unquery/values.yaml
+        global:
+          imageRegistry: ghcr.io/myorg
+          environment: production
+
+      → every subchart sees .Values.global.imageRegistry
+
+  Use globals for things truly shared
+  (registry, env, domain). Use named keys for the rest.
+
+----------------------------------------------------------------
+6. RELEASE LIFECYCLE — ONE RELEASE, MANY WORKLOADS
+----------------------------------------------------------------
+  ┌──────────────────────────┬───────────────────────────────┐
+  │ Command                  │ Effect on subcharts           │
+  ├──────────────────────────┼───────────────────────────────┤
+  │ helm install r ./umbr    │ Installs ALL subcharts        │
+  │ helm upgrade r ./umbr    │ Diffs & updates ALL atomically│
+  │ helm rollback r 2        │ Rolls back ALL to revision 2  │
+  │ helm uninstall r         │ Tears down ALL subcharts      │
+  │ helm list                │ Shows ONE release, not many   │
+  │ helm history r           │ One linear history for all    │
+  └──────────────────────────┴───────────────────────────────┘
+
+  All resources tagged with:
+      app.kubernetes.io/instance: <release-name>
+      app.kubernetes.io/managed-by: Helm
+
+  → kubectl get all -l app.kubernetes.io/instance=unquery
+    shows everything in the release.
+
+----------------------------------------------------------------
+7. WHEN NOT TO USE AN UMBRELLA
+----------------------------------------------------------------
+  ┌───────────────────────────┬────────────────────────────────┐
+  │ Situation                 │ Better choice                  │
+  ├───────────────────────────┼────────────────────────────────┤
+  │ Single-service app        │ Just one normal chart          │
+  │ Services released         │ Separate charts in separate    │
+  │ on different schedules    │ repos, different release names │
+  │ 30+ services in a mesh    │ Helmfile / ArgoCD AppSets      │
+  │ Need per-service rollback │ Separate releases (atomicity   │
+  │                           │ becomes a downside, not perk)  │
+  └───────────────────────────┴────────────────────────────────┘
+
+  Rule of thumb:
+    "If they ship together, an umbrella fits.
+     If they ship apart, keep them apart."
+
+----------------------------------------------------------------
+8. AUTHORING WORKFLOW (DAY-TO-DAY)
+----------------------------------------------------------------
+  Step-by-step pattern when working on an umbrella:
+
+      1. Edit subchart template OR umbrella values
+      2. helm dependency update     (only if deps changed)
+      3. helm lint ./unquery        (catch syntax errors)
+      4. helm template ./unquery    (render YAML — no install)
+      5. helm install --dry-run     (server-side validation)
+      6. helm install r ./unquery -f values-dev.yaml
+      7. helm upgrade r ./unquery -f values-dev.yaml
+      8. helm rollback r N          (if it goes sideways)
+
+  Debug commands:
+      helm get values r       → current effective values
+      helm get manifest r     → rendered manifests in cluster
+      helm history r          → all revisions
+
+----------------------------------------------------------------
+9. COMMON CHALLENGES
+----------------------------------------------------------------
+  ┌────────────────────────┬─────────────────────────────────┐
+  │ Challenge              │ Why it bites                    │
+  ├────────────────────────┼─────────────────────────────────┤
+  │ Override key mismatch  │ Wrong subchart name → silent    │
+  │                        │ skip; defaults silently win     │
+  │ Forgetting `helm dep   │ Old subchart .tgz used → stale  │
+  │ update`                │ deploy with old defaults        │
+  │ Conflicting resource   │ Two subcharts both create a     │
+  │ names                  │ Service named "api" → collision │
+  │ Globals overused       │ Every subchart starts depending │
+  │                        │ on hidden parent shape          │
+  │ Subchart owns DB       │ Lifecycle of stateful service   │
+  │                        │ tied to app release — risky in  │
+  │                        │ prod (use external DB instead)  │
+  │ Cross-subchart refs    │ Subchart A hardcoding subchart  │
+  │                        │ B's service name → tight coupling│
+  └────────────────────────┴─────────────────────────────────┘
+
+----------------------------------------------------------------
+10. KEY INTUITION SUMMARY
+----------------------------------------------------------------
+  Umbrella chart = a chart that ships OTHER charts.
+
+    Umbrella    → coordinator, no workloads of its own
+    Subcharts   → the actual services (yours + external)
+    values.yaml → single tuning knob for the whole stack
+    Release     → one name, one history, one rollback
+
+  The 3 things that matter most:
+
+    (1) Subchart name = top-level key in parent values
+    (2) Parent values ALWAYS win over subchart defaults
+    (3) One install/upgrade/rollback covers everything
+
+  When to reach for it:
+    "I have multiple services that ship as one product
+     and I want one button to deploy/upgrade/roll back."
+
+  When to skip it:
+    "These services have independent release cycles
+     or independent owners."
+
+  Memory hook:
+    Umbrella keeps everyone DRY under ONE deploy.
+================================================================
+
+```

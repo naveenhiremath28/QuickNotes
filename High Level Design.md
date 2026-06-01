@@ -448,7 +448,10 @@ Case 2: Choose Consistency (CP)
   In distributed systems → P is NOT optional
   So real trade-off is always → C vs A
 ================================================================
+
 ```
+
+
 
 
 ## Rate Limiter in System Design
@@ -1678,4 +1681,820 @@ ONE-LINE TAKEAWAY:
 
 ================================================================
 ```
+
+
+
+```
+================================================================
+   API GATEWAY — COMPLETE STRUCTURED NOTES
+================================================================
+
+----------------------------------------------------------------
+1. THE PROBLEM — CHAOS OF MICROSERVICES
+----------------------------------------------------------------
+Modern apps are built with multiple microservices.
+Without a gateway, clients talk directly to each service.
+
+BASIC SETUP (no gateway):
+
+  Clients (Web/Mobile/Tablet)
+       │
+       ├──► Payment Service
+       ├──► Subscription Service
+       ├──► Users Service
+       └──► Notification Service
+
+PROBLEMS this creates:
+
+  - Chaotic Direct Connections
+    Every client knows about every service
+    Tightly coupled — change one service = update all clients
+
+  - Redundant Logic in Services
+    Every service must implement its own:
+    Auth, rate limiting, logging, SSL — duplicated everywhere
+
+  - No Unified Monitoring
+    No single place to see all traffic and errors
+
+  - Security Vulnerabilities
+    Every service is exposed directly to the internet
+    Each one is an attack surface
+
+  - Scaling Nightmares
+    Hard to scale individual services independently
+    No central control point
+
+  - Inefficient Data Aggregation
+    Client needs data from 3 services?
+    → Makes 3 separate calls, waits for all 3
+
+----------------------------------------------------------------
+2. WHAT IS AN API GATEWAY?
+----------------------------------------------------------------
+A single entry point that sits between clients and
+all your microservices.
+
+All requests go THROUGH the gateway.
+Gateway decides what to do with them.
+
+FLOW WITH GATEWAY:
+
+  Clients (Web / Mobile / Tablet)
+       │
+       │  GET / POST
+       ▼
+  ┌─────────────────────────────┐
+  │         API Gateway         │
+  │                             │
+  │   1. Validate Request       │
+  │   2. Run Middleware         │
+  │   3. Reroute                │
+  │   4. Transform Response     │
+  └─────────────────────────────┘
+       │
+       ├──► Payment Service
+       ├──► Subscription Service
+       ├──► Users Service
+       └──► Notification Service
+
+Clients only know about ONE address — the API Gateway.
+Services are hidden from the outside world.
+
+----------------------------------------------------------------
+3. HOW API GATEWAY FILTERS REQUESTS (Funnel)
+----------------------------------------------------------------
+Every request passes through layers before reaching a service.
+Think of it as a funnel — only valid requests get through.
+
+FILTERING LAYERS (top to bottom):
+
+  All incoming requests (many)
+         │
+         ▼
+  TLS Termination       ← handles SSL/HTTPS
+         │
+         ▼
+  Authentication        ← verify JWT / API keys
+         │
+         ▼
+  Routing               ← which service handles this?
+         │
+         ▼
+  Transformation        ← modify request/response format
+         │
+         ▼
+  Aggregation           ← combine responses from services
+         │
+         ▼
+  Services (fewer, valid requests only)
+
+Inside the gateway at each step:
+  Validate request → Run Middleware → Reroute → Transform response
+
+----------------------------------------------------------------
+4. REQUEST VALIDATION PROCESS
+----------------------------------------------------------------
+Every incoming request goes through this validation pipeline:
+
+  Receive Request
+       │
+       ▼
+  Validate URL          ← is the endpoint correct?
+       │
+       ▼
+  Check Headers         ← auth token present? content-type?
+       │
+       ▼
+  Validate Body         ← required fields? correct format?
+       │
+       ├── Valid ──────────────────► Forward to Service
+       │
+       └── Invalid ────────────────► Reject Invalid Request
+                                            │
+                                            ▼
+                                     Send Error Message
+                                     (400 / 401 / 403)
+
+----------------------------------------------------------------
+5. MIDDLEWARE — WHAT GATEWAY DOES IN THE MIDDLE
+----------------------------------------------------------------
+The gateway runs middleware on every request.
+These are cross-cutting concerns handled ONCE centrally.
+
+Middleware responsibilities:
+
+  Security:
+    - Authenticate requests using JWT tokens
+    - Whitelist / blacklist IPs
+    - Terminate SSL connections (TLS termination)
+    - Handle CORS headers
+
+  Performance:
+    - Compress responses
+    - Validate request sizes
+    - Handle response timeouts
+    - Throttle traffic
+
+  Monitoring:
+    - Log and monitor all traffic
+    - Unified visibility across all services
+
+  Compliance:
+    - Version APIs (v1, v2, v3)
+    - Integrate with service discovery
+    - Limit request rates to prevent abuse
+
+Without gateway → each service implements ALL of this itself.
+With gateway    → done ONCE, applied to EVERY service.
+
+----------------------------------------------------------------
+6. PROS AND CONS OF API GATEWAY
+----------------------------------------------------------------
+
+  PROS:
+    - Centralized security
+      Auth, SSL, IP filtering in one place
+    - Reduced coupling
+      Clients don't know about individual services
+    - Improved performance
+      Caching, compression, aggregation
+    - Scalability
+      Services scale independently behind the gateway
+    - Fault tolerance
+      Gateway can reroute if a service goes down
+
+  CONS:
+    - Operational complexity
+      One more system to deploy, manage, and monitor
+    - Cost
+      Running and maintaining a gateway adds infrastructure cost
+    - Latency
+      Every request goes through an extra hop
+      Adds a small but real delay
+
+  ┌──────────────────────┬──────────────────────────────────┐
+  │ PROS                 │ CONS                             │
+  ├──────────────────────┼──────────────────────────────────┤
+  │ Centralized security │ Operational complexity           │
+  │ Reduced coupling     │ Added cost                       │
+  │ Better performance   │ Extra latency per request        │
+  │ Scalability          │                                  │
+  │ Fault tolerance      │                                  │
+  └──────────────────────┴──────────────────────────────────┘
+
+----------------------------------------------------------------
+7. FULL PICTURE — COMPLETE FLOW
+----------------------------------------------------------------
+
+  Client (Web / Mobile / Tablet)
+       │
+       │ GET or POST request
+       ▼
+  ┌─────────────────────────────┐
+  │         API Gateway         │
+  │                             │
+  │  ┌───────────────────────┐  │
+  │  │   Validate Request    │  │ ← check URL, headers, body
+  │  ├───────────────────────┤  │
+  │  │    Run Middleware      │  │ ← auth, rate limit, logging
+  │  ├───────────────────────┤  │
+  │  │       Reroute         │  │ ← decide which service
+  │  ├───────────────────────┤  │
+  │  │  Transform Response   │  │ ← format response for client
+  │  └───────────────────────┘  │
+  └─────────────────────────────┘
+       │
+       ├──────────────────► Payment Service
+       ├──────────────────► Subscription Service
+       ├──────────────────► Users Service
+       └──────────────────► Notification Service
+
+Response travels back:
+  Service → Gateway (transforms) → Client
+
+----------------------------------------------------------------
+COMPONENT SUMMARY
+----------------------------------------------------------------
+  Component           Purpose
+  ─────────────────── ──────────────────────────────────────────
+  API Gateway         Single entry point for all clients
+  TLS Termination     Handle HTTPS at gateway, not each service
+  Authentication      Verify JWT / API keys centrally
+  Rate Limiter        Prevent abuse and overload
+  Router              Direct request to correct microservice
+  Transformer         Convert request/response formats
+  Aggregator          Combine responses from multiple services
+  Middleware          Cross-cutting logic run on every request
+  Request Validator   Check URL, headers, body before forwarding
+
+================================================================
+```
+
+
+Atomic Operations?
+
+
+```
+================================================================
+   QUICK-COMMERCE SYSTEM DESIGN — (Blinkit, Zepto, GoPuff)
+   COMPLETE STRUCTURED NOTES
+================================================================
+
+----------------------------------------------------------------
+1. THE PROBLEM — WHY QUICK-COMMERCE?
+----------------------------------------------------------------
+Traditional e-commerce (Amazon, Flipkart) delivers in 1-7 days.
+Modern users want EVERYDAY ITEMS in MINUTES, not days.
+
+PROBLEMS with traditional e-commerce for groceries:
+
+  - Slow Delivery
+    1-2 days is too long for milk, bread, snacks
+
+  - Centralized Warehouses
+    One huge warehouse far from customer = long delivery time
+
+  - Inventory Mismatch
+    No real-time stock view per location
+
+  - No Geographic Awareness
+    Cannot route to the NEAREST stock location
+
+QUICK-COMMERCE SOLUTION:
+  Small warehouses (dark stores) placed CLOSE to users.
+  Promise: Delivery in 10-30 minutes.
+
+Famous examples:
+  - Blinkit (India)
+  - Zepto  (India)
+  - GoPuff (USA)
+  - Getir  (Europe)
+
+----------------------------------------------------------------
+2. THE 30-MINUTE MAGIC (HIGH-LEVEL FLOW)
+----------------------------------------------------------------
+Every quick-commerce order follows this lifecycle:
+
+  User (at home)
+       │
+       │ Opens app, picks items
+       ▼
+  ┌─────────────────────────────┐
+  │       Mobile App            │
+  │   (Browse + Add to cart)    │
+  └─────────────────────────────┘
+       │
+       │ Sends request
+       ▼
+  ┌─────────────────────────────┐
+  │       Cloud Server          │
+  │    (Backend services)       │
+  └─────────────────────────────┘
+       │
+       ├──► Nearest Warehouse #1  ◄── stock check
+       ├──► Nearest Warehouse #2  ◄── stock check
+       └──► Delivery Agent        ◄── pickup + drop
+
+  Result: Order delivered in ~30 minutes.
+
+KEY INSIGHT:
+  Unlike Amazon, Q-commerce places MANY small warehouses
+  (dark stores) close to customers — not one giant warehouse
+  far away. This is what makes 30-min delivery possible.
+
+----------------------------------------------------------------
+3. SYSTEM REQUIREMENTS
+----------------------------------------------------------------
+Before designing, we list what the system MUST do.
+
+FUNCTIONAL + NON-FUNCTIONAL REQUIREMENTS:
+
+  ┌────────────────────────┬─────────────────────────────────┐
+  │ Requirement            │ Description                     │
+  ├────────────────────────┼─────────────────────────────────┤
+  │ Availability Connection│ Connect to any DC within 1 hour │
+  │ Ordering Consistency   │ Strong consistency across nodes │
+  │ Order Volume           │ Handle 1 million orders/day     │
+  │ Order Items            │ Users can order any catalog item│
+  │ Availability Speed     │ 100ms response time             │
+  │ System Size            │ 10,000 DCs, 100,000 items each  │
+  │ Query Availability     │ Stock query by location < 1 hr  │
+  └────────────────────────┴─────────────────────────────────┘
+
+BACK-OF-ENVELOPE MATH:
+  1,000,000 orders/day ÷ 86,400 sec ≈ 12 orders/sec average
+  Peak load: ~5x average → ~60 orders/sec at peak
+  Catalog rows: 100,000 items × 10,000 DCs = 1 billion rows
+
+WHY THESE MATTER:
+  - Connection      → user must reach a DC quickly
+  - Consistency     → no overselling the same item
+  - Volume          → drives scale planning
+  - Speed (100ms)   → user won't wait long
+
+----------------------------------------------------------------
+4. ESSENTIAL TERMINOLOGY (4 CORE ENTITIES)
+----------------------------------------------------------------
+Understanding these 4 entities is CRITICAL.
+
+  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐
+  │ Inventory  │  │    Item    │  │     DC     │  │   Order    │
+  │            │  │            │  │            │  │            │
+  │  Physical  │  │   Type of  │  │  Physical  │  │ Collection │
+  │  instance  │  │   item     │  │  location  │  │ of items   │
+  │   at a DC  │  │ e.g.Cheetos│  │ storing    │  │ by a user  │
+  │            │  │            │  │   items    │  │            │
+  └────────────┘  └────────────┘  └────────────┘  └────────────┘
+
+KEY DISTINCTION — Item vs Inventory:
+
+  Item       = Abstract product (e.g. "Lays Classic 50g")
+  Inventory  = Physical stock of that item at a specific DC
+
+  Same Item can exist as Inventory across MANY DCs.
+
+EXAMPLE:
+  Item: "Lays Classic 50g"
+    ├── Inventory at DC-Mumbai-01 : 30 packets
+    ├── Inventory at DC-Mumbai-02 : 12 packets
+    └── Inventory at DC-Delhi-05  : 50 packets
+
+----------------------------------------------------------------
+5. HIGH-LEVEL ARCHITECTURE — TYING IT TOGETHER
+----------------------------------------------------------------
+The system has 4 main layers.
+
+FULL ARCHITECTURE FLOW:
+
+  ┌──────────────────────┐
+  │  Client Application  │
+  │   (Mobile / Web)     │
+  │   iOS/Android/React  │
+  └──────────────────────┘
+            │
+            │ HTTPS / REST
+            ▼
+  ┌──────────────────────────┐
+  │       API Gateway        │
+  │                          │
+  │  • Authentication & Auth │
+  │  • Rate Limiting         │
+  │  • Load Balancing        │
+  │  • Request Routing       │
+  │                          │
+  │   Port: 8080 | NGINX     │
+  └──────────────────────────┘
+            │
+            │ Routes to correct microservice
+            │
+            ├────────────────────┬────────────────────┐
+            ▼                    ▼                    ▼
+  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+  │   Availability   │ │     Location     │ │      Order       │
+  │     Service      │ │     Service      │ │     Service      │
+  │                  │ │                  │ │                  │
+  │  Real-time       │ │  Find nearest    │ │  Process orders  │
+  │  inventory check │ │  DCs             │ │  + payments      │
+  │                  │ │                  │ │                  │
+  │   Port: 8081     │ │   Port: 8082     │ │   Port: 8083     │
+  └──────────────────┘ └──────────────────┘ └──────────────────┘
+            │                    │                    │
+            │ Query Inventory    │ Location Lookup    │ Write Transaction
+            ▼                    ▼                    ▼
+  ┌────────────────────────────────────────────────────────────┐
+  │              Distribution Center Database                  │
+  │              (Regional Fulfillment Hub)                    │
+  │                                                            │
+  │  DC Properties:                                            │
+  │    dc_id, latitude, longitude, address, capacity           │
+  │                                                            │
+  │  ┌──────────────┐   ┌────────────────┐                     │
+  │  │    ITEMS     │   │   INVENTORY    │                     │
+  │  │  item_id PK  │   │ inventory_id PK│                     │
+  │  │  name        │   │ item_id FK     │                     │
+  │  │  description │   │ dc_id FK       │                     │
+  │  │  category    │   │ quantity       │                     │
+  │  │  price       │   │ reserved_qty   │                     │
+  │  └──────────────┘   └────────────────┘                     │
+  │                                                            │
+  │  ┌──────────────┐   ┌────────────────┐                     │
+  │  │   ORDERS     │   │  ORDER_ITEMS   │                     │
+  │  │  order_id PK │   │ order_item_id  │                     │
+  │  │  customer_id │   │ order_id FK    │                     │
+  │  │  dc_id FK    │   │ item_id FK     │                     │
+  │  │  status      │   │ quantity       │                     │
+  │  │  total_amount│   │ unit_price     │                     │
+  │  └──────────────┘   └────────────────┘                     │
+  └────────────────────────────────────────────────────────────┘
+
+WHY MICROSERVICES?
+  - Each service scales independently
+  - Failure in one (e.g. Availability) doesn't kill ordering
+  - Different teams own different services
+- [ ] 
+----------------------------------------------------------------
+6. NEARBY (LOCATION) SERVICE
+----------------------------------------------------------------
+PURPOSE: Given user coordinates, find nearest DCs.
+
+FLOW:
+
+  Input Coordinates    Calculate Distance    Return DC List
+       (1)                  (2)                   (3)
+        │                    │                     │
+        ▼                    ▼                     ▼
+  ┌────────────┐      ┌────────────┐         ┌────────────┐
+  │  lat/long  │ ───► │ Geospatial │ ──────► │  DC list   │
+  │  radius_km │      │   Query    │         │  (sorted)  │
+  └────────────┘      └────────────┘         └────────────┘
+
+INPUT PARAMETERS:
+  latitude  : DECIMAL(10,8)
+  longitude : DECIMAL(11,8)
+  radius_km : INTEGER
+
+PROCESSING:
+  - Haversine distance formula (great-circle distance)
+  - Earth curvature compensation
+  - Geospatial indexing for fast lookup
+
+DC_LOCATIONS TABLE:
+
+  ┌──────────────────────┐
+  │     DC_LOCATIONS     │
+  ├──────────────────────┤
+  │  dc_id     (PK)      │
+  │  latitude            │
+  │  longitude           │
+  │  address             │
+  │  capacity            │
+  │  region              │
+  └──────────────────────┘
+
+WHY GEOSPATIAL INDEXING?
+  - Naive distance calc across 10,000 DCs → SLOW
+  - Geospatial index (PostGIS, Geohash, R-Tree)
+  - Reduces query time from O(N) to O(log N)
+
+OUTPUT:
+  List of DC IDs sorted by distance from user.
+
+----------------------------------------------------------------
+7. AVAILABILITY SERVICE
+----------------------------------------------------------------
+PURPOSE: Given a list of DCs, return what items are in stock.
+
+FLOW:
+
+  Input DC List      JOIN Query        Return Inventory
+       (1)              (2)                  (3)
+        │                │                    │
+        ▼                ▼                    ▼
+  ┌────────────┐  ┌──────────────┐     ┌────────────┐
+  │  dc_ids[]  │─►│ JOIN Items   │ ──► │ {item:qty} │
+  │ item_filter│  │ + Inventory  │     │  mapping   │
+  │  category  │  └──────────────┘     └────────────┘
+  └────────────┘
+
+INPUT PARAMETERS:
+  dc_ids      : Array<UUID>          (from Nearby Service)
+  item_filter : String (optional)
+  category    : String (optional)
+
+PROCESSING:
+  - JOIN Items table with Inventory table
+  - Filter by DC IDs from Nearby Service
+  - Return list of {item_id: quantity}
+
+DATABASE TABLES:
+
+  ┌────────────────┐         ┌────────────────────┐
+  │     ITEMS      │         │     INVENTORY      │
+  ├────────────────┤         ├────────────────────┤
+  │  item_id (PK)  │◄────────│  item_id (FK)      │
+  │  name          │         │  inventory_id (PK) │
+  │  description   │         │  dc_id (FK)        │
+  │  category      │         │  quantity          │
+  │  price         │         │  reserved_qty      │
+  └────────────────┘         │  available_qty     │
+                             └────────────────────┘
+
+JOIN LOGIC (SQL):
+  SELECT i.name, inv.available_qty
+  FROM items i
+  JOIN inventory inv ON i.item_id = inv.item_id
+  WHERE inv.dc_id IN (dc_id_list)
+    AND inv.available_qty > 0;
+
+WHY available_qty AND reserved_qty?
+  - quantity       = total physical stock
+  - reserved_qty   = locked by in-progress orders
+  - available_qty  = quantity - reserved_qty
+  → Prevents 2 users buying the last item simultaneously
+
+----------------------------------------------------------------
+8. ORDER SERVICE
+----------------------------------------------------------------
+PURPOSE: Accept an order and atomically commit it to the DB.
+
+FLOW:
+
+  Order Request    Atomic Transaction    Order Confirmed
+       (1)               (2)                  (3)
+        │                 │                    │
+        ▼                 ▼                    ▼
+  ┌────────────┐   ┌──────────────┐     ┌────────────┐
+  │ customer_id│──►│  PostgreSQL  │ ──► │  order_id  │
+  │  items[]   │   │ ACID + Locks │     │  returned  │
+  │   dc_id    │   └──────────────┘     └────────────┘
+  └────────────┘
+
+ORDER REQUEST:
+  customer_id : UUID
+  items       : [{item_id, quantity}]
+  dc_id       : UUID
+
+ATOMIC TRANSACTION (all-or-nothing):
+  1. Check inventory availability
+  2. Create order + order_items records
+  3. Update inventory (decrement quantity)
+  4. Commit or rollback as a single unit
+
+DATABASE: PostgreSQL
+  - ACID transactions
+  - Row-Level Locking
+
+INSIDE THE TRANSACTION:
+
+  ┌─────────────────────────────────────┐
+  │       PostgreSQL Database           │
+  │                                     │
+  │  ┌─────────────┐ ┌────────────────┐ │
+  │  │   ORDERS    │ │  ORDER_ITEMS   │ │
+  │  │ order_id PK │ │ order_item_id  │ │
+  │  │ customer_id │ │ order_id FK    │ │
+  │  │ dc_id FK    │ │ item_id FK     │ │
+  │  │ status      │ │ quantity       │ │
+  │  │ total_amount│ │ unit_price     │ │
+  │  └─────────────┘ └────────────────┘ │
+  │                                     │
+  │  ┌──────────────────────┐           │
+  │  │  INVENTORY (LOCKED)  │ ◄── lock  │
+  │  │  inventory_id (PK)   │   during  │
+  │  │  item_id (FK)        │   txn     │
+  │  │  dc_id (FK)          │           │
+  │  │  quantity            │           │
+  │  │  reserved_qty        │           │
+  │  └──────────────────────┘           │
+  └─────────────────────────────────────┘
+
+WHY ROW-LEVEL LOCKING?
+  Scenario: 2 users buy the LAST Cheetos packet at the same time
+    - Without locking → both succeed → oversold ✗
+    - With locking    → only 1 succeeds → consistent ✓
+
+WHY ACID?
+  - Atomicity   : Order fully placed OR fully rolled back
+  - Consistency : No invalid states (no negative stock)
+  - Isolation   : Concurrent orders don't conflict
+  - Durability  : Confirmed orders survive crashes
+
+----------------------------------------------------------------
+9. END-TO-END REQUEST FLOW (INTERVIEW READY)
+----------------------------------------------------------------
+
+  User: "Order 2 packets of Lays from my location"
+
+  Step 1: Client → API Gateway
+    ┌─────────────┐
+    │  Auth check │ ← JWT token
+    │  Rate limit │
+    │   Routing   │
+    └─────────────┘
+
+  Step 2: Gateway → Location Service
+    Input  : user lat/long
+    Output : [DC_42, DC_43, DC_17]   ← nearby DCs
+
+  Step 3: Gateway → Availability Service
+    Input  : [DC_42, DC_43, DC_17] + "Lays"
+    Output : {DC_42: 30, DC_43: 12}  ← stock per DC
+
+  Step 4: User confirms → Gateway → Order Service
+    ┌──────────────────────────────────┐
+    │  BEGIN TRANSACTION               │
+    │    LOCK row for Lays @ DC_42     │
+    │    UPDATE inventory: qty -= 2    │
+    │    INSERT INTO orders            │
+    │    INSERT INTO order_items       │
+    │  COMMIT                          │
+    └──────────────────────────────────┘
+
+  Step 5: Order Confirmed
+    Return order_id → user
+    Trigger delivery agent dispatch (async)
+
+----------------------------------------------------------------
+10. KEY DESIGN DECISIONS — WHY?
+----------------------------------------------------------------
+
+  ┌──────────────────────────┬────────────────────────────────┐
+  │ Decision                 │ Reason                         │
+  ├──────────────────────────┼────────────────────────────────┤
+  │ Microservices            │ Independent scaling & failure  │
+  │ PostgreSQL for orders    │ ACID needed for transactions   │
+  │ Row-level locking        │ Prevent overselling            │
+  │ Regional DC databases    │ Low latency, data locality     │
+  │ Geospatial indexing      │ Fast nearest-DC lookups        │
+  │ API Gateway              │ Central auth + rate limiting   │
+  │ Reserved_qty column      │ Handle in-flight orders        │
+  └──────────────────────────┴────────────────────────────────┘
+
+CONSISTENCY CHOICE (CAP Theorem applied):
+
+  ┌─────────────────────┬──────────────────────────────────┐
+  │ Service             │ CAP Choice                       │
+  ├─────────────────────┼──────────────────────────────────┤
+  │ Order Service       │ CP — accuracy > availability     │
+  │ Availability/Browse │ AP — availability > accuracy     │
+  │ Nearby/Location     │ AP — stale DC list is fine       │
+  └─────────────────────┴──────────────────────────────────┘
+
+  Order   = wrong inventory = lost money → MUST be consistent
+  Browse  = slightly stale stock is OK   → MUST be available
+
+----------------------------------------------------------------
+11. SCALABILITY CONSIDERATIONS
+----------------------------------------------------------------
+
+HORIZONTAL SCALING:
+
+  ┌────────┐ ┌────────┐ ┌────────┐
+  │ Order  │ │ Order  │ │ Order  │   ← multiple instances
+  │ Svc-1  │ │ Svc-2  │ │ Svc-3  │
+  └────────┘ └────────┘ └────────┘
+        │         │         │
+        └─────────┴─────────┘
+                  │
+            Load Balancer
+
+CACHING (Redis):
+  - Hot items (top sellers) cached in Redis
+  - Reduces DB load on Availability Service
+  - Cache invalidated on inventory update
+
+DATABASE SHARDING:
+  - Shard by dc_id (region-based)
+  - Each region keeps its own DB
+  - Reduces cross-region queries
+
+ASYNC PROCESSING (Kafka):
+
+  Order placed (sync) → user gets confirmation
+       │
+       └──► Kafka queue (async)
+              │
+              ├──► Delivery dispatch
+              ├──► Notifications
+              ├──► Analytics
+              └──► Inventory replenishment
+
+----------------------------------------------------------------
+12. PROS AND CONS OF THIS DESIGN
+----------------------------------------------------------------
+
+  ┌──────────────────────┬──────────────────────────────────┐
+  │ PROS                 │ CONS                             │
+  ├──────────────────────┼──────────────────────────────────┤
+  │ Fast delivery (30min)│ Many small warehouses = expensive│
+  │ Scales per region    │ Operational complexity is high   │
+  │ Strong consistency   │ Cross-region orders are hard     │
+  │   on orders          │                                  │
+  │ Independent services │ Extra latency from gateway       │
+  │ Real-time inventory  │ Inventory sync across DCs hard   │
+  └──────────────────────┴──────────────────────────────────┘
+
+----------------------------------------------------------------
+13. FULL PICTURE — COMPLETE SYSTEM
+----------------------------------------------------------------
+
+  User (Mobile / Web)
+       │
+       │ HTTPS / REST
+       ▼
+  ┌─────────────────────────────┐
+  │         API Gateway         │
+  │                             │
+  │  ┌───────────────────────┐  │
+  │  │   Authentication      │  │
+  │  ├───────────────────────┤  │
+  │  │    Rate Limiting      │  │
+  │  ├───────────────────────┤  │
+  │  │   Load Balancing      │  │
+  │  ├───────────────────────┤  │
+  │  │   Request Routing     │  │
+  │  └───────────────────────┘  │
+  └─────────────────────────────┘
+       │
+       ├──► Location Service ────► DC_LOCATIONS DB
+       │       (find nearby DCs)
+       │
+       ├──► Availability Service ─► Items + Inventory DB
+       │       (check stock)
+       │
+       └──► Order Service ───────► PostgreSQL (ACID + Locks)
+               (place order)         │
+                                     ├─► Orders table
+                                     ├─► Order_Items table
+                                     └─► Inventory (LOCKED)
+                                              │
+                                              ▼
+                                       Async via Kafka
+                                              │
+                                              ├─► Delivery dispatch
+                                              ├─► Notifications
+                                              └─► Analytics
+
+----------------------------------------------------------------
+14. KEY INTUITION SUMMARY
+----------------------------------------------------------------
+
+  Quick-commerce = "Amazon, but in 30 minutes"
+  Key trick      = Small warehouses (dark stores) NEAR users
+
+  3 CORE SERVICES:
+    Nearby       → "Where is the closest DC?"
+    Availability → "What's in stock there?"
+    Order        → "Lock it and sell it atomically"
+
+  4 CORE ENTITIES:
+    Item, Inventory, Distribution Center, Order
+
+  CRITICAL GUARANTEE:
+    No overselling → enforced via DB transactions + locking
+
+----------------------------------------------------------------
+COMPONENT SUMMARY
+----------------------------------------------------------------
+  Component             Purpose
+  ───────────────────── ─────────────────────────────────────────
+  Client App            Mobile/Web interface for users
+  API Gateway           Single entry, auth, rate limit, routing
+  Location Service      Find nearest DCs using lat/long
+  Availability Service  Check live stock at nearby DCs
+  Order Service         Atomically place + confirm orders
+  Distribution Center   Physical warehouse with local inventory
+  Items Table           Catalog of products (abstract types)
+  Inventory Table       Physical stock per DC (real instances)
+  Orders Table          Customer order records
+  Order_Items Table     Line items per order
+  DC_Locations Table    Geospatial index of DCs
+  PostgreSQL            ACID-compliant DB for transactions
+  Redis Cache           Hot-item caching for fast reads
+  Kafka                 Async queue for non-critical workflows
+  Geospatial Index      Fast nearest-DC lookups (Haversine)
+================================================================
+```
+
 

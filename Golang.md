@@ -409,3 +409,565 @@ FINAL SUMMARY
 
 ================================================================
 ```
+
+
+```
+================================================================
+            ANONYMOUS FUNCTIONS
+================================================================
+
+----------------------------------------------------------------
+1. WHAT IS AN ANONYMOUS FUNCTION?
+----------------------------------------------------------------
+A function WITHOUT A NAME.
+
+- Defined inline
+- Used once OR stored in a variable
+- Treated as a VALUE (functions are first-class in Go)
+
+----------------------------------------------------------------
+2. SYNTAX
+----------------------------------------------------------------
+  func(parameters) returnType {
+      // body
+  }
+
+No name after `func`.
+
+----------------------------------------------------------------
+3. ASSIGN TO A VARIABLE
+----------------------------------------------------------------
+  add := func(a, b int) int {
+      return a + b
+  }
+
+  add(3, 4)   // 7
+
+Type of add:
+  func(int, int) int
+
+----------------------------------------------------------------
+4. IMMEDIATELY INVOKED
+----------------------------------------------------------------
+Call it right where you define it:
+
+  func() {
+      fmt.Println("Hello")
+  }()
+
+The trailing `()` CALLS the function.
+
+With arguments:
+
+  func(name string) {
+      fmt.Println("Hi", name)
+  }("Sam")
+
+----------------------------------------------------------------
+5. CLOSURES
+----------------------------------------------------------------
+An anonymous function can access variables from its
+SURROUNDING SCOPE. This is called a CLOSURE.
+
+  func counter() func() int {
+      count := 0
+      return func() int {
+          count++
+          return count
+      }
+  }
+
+  c := counter()
+  c()   // 1
+  c()   // 2
+  c()   // 3
+
+Key idea:
+  - Inner function "remembers" count
+  - count survives after counter() returns
+
+----------------------------------------------------------------
+6. COMMON USES
+----------------------------------------------------------------
+(a) Goroutines
+      go func() {
+          fmt.Println("background work")
+      }()
+
+(b) defer
+      defer func() {
+          fmt.Println("cleanup")
+      }()
+
+(c) Callbacks (passed as arguments)
+
+----------------------------------------------------------------
+FINAL SUMMARY
+----------------------------------------------------------------
+- Anonymous function = function with no name
+- Can be assigned, invoked immediately, or passed around
+- Supports closures (captures outer variables)
+- Common in goroutines, defer, and callbacks
+
+================================================================
+```
+
+
+
+```
+================================================================
+       CLOSURES & ANONYMOUS FUNCTIONS — DEEP DIVE
+================================================================
+
+----------------------------------------------------------------
+1. ANONYMOUS FUNCTION
+----------------------------------------------------------------
+A function WITHOUT A NAME.
+
+Syntax:
+  func(parameters) returnType {
+      // body
+  }
+
+Three usage patterns:
+  (a) Assign to a variable
+  (b) Invoke immediately (IIFE)
+  (c) Pass as argument / return as value
+
+(a) Assigned:
+  add := func(a, b int) int { return a + b }
+  add(3, 4)   // 7
+
+(b) Immediately invoked:
+  func() {
+      fmt.Println("hello")
+  }()
+
+(c) Passed as callback:
+  apply(nums, func(x int) int { return x * x })
+
+Functions in Go are FIRST-CLASS values
+  → can be assigned, passed, returned
+
+----------------------------------------------------------------
+2. WHAT IS A CLOSURE?
+----------------------------------------------------------------
+A closure is a function that REMEMBERS variables from
+the scope where it was created — even after that scope
+has finished executing.
+
+  Closure = function + captured variables (its "backpack")
+
+Basic example:
+  func counter() func() int {
+      count := 0
+      return func() int {
+          count++
+          return count
+      }
+  }
+
+  c := counter()
+  c()   // 1
+  c()   // 2
+  c()   // 3
+
+Why it works:
+  - counter() returns the inner function
+  - Inner function uses `count`
+  - `count` survives because the inner function holds it
+
+----------------------------------------------------------------
+3. CAPTURED BY REFERENCE
+----------------------------------------------------------------
+Closures capture variables BY REFERENCE, not by value.
+
+  x := 10
+  f := func() { fmt.Println(x) }
+  x = 20
+  f()   // prints 20
+
+The closure sees the LATEST value, not a snapshot.
+
+----------------------------------------------------------------
+4. EACH CLOSURE HAS ITS OWN STATE
+----------------------------------------------------------------
+Every call to the outer function creates a NEW backpack.
+
+  c1 := counter()
+  c2 := counter()
+
+  c1()   // 1
+  c1()   // 2
+  c2()   // 1   (independent of c1)
+
+----------------------------------------------------------------
+5. LOOP VARIABLE PITFALL
+----------------------------------------------------------------
+  for i := 0; i < 3; i++ {
+      funcs = append(funcs, func() {
+          fmt.Println(i)
+      })
+  }
+
+Before Go 1.22 → prints 3 3 3 (all share same i)
+Go 1.22+       → prints 0 1 2 (each iteration gets own i)
+
+Fix for older Go:
+  for i := 0; i < 3; i++ {
+      i := i              // shadow it
+      funcs = append(funcs, func() {
+          fmt.Println(i)
+      })
+  }
+
+================================================================
+            MEMORY MODEL — HOW CLOSURES WORK
+================================================================
+
+----------------------------------------------------------------
+6. STACK vs HEAP
+----------------------------------------------------------------
+  STACK
+    - Fast, temporary
+    - Local variables
+    - Wiped when function returns
+
+  HEAP
+    - Stays alive while something references it
+    - Cleaned by garbage collector (GC)
+
+Normal variable:
+  func number() {
+      a := 10           // lives on STACK
+  }
+  number()              // a is gone
+
+Captured variable:
+  func counter() func() int {
+      count := 0        // lives on HEAP (because captured)
+      return func() int {
+          count++
+          return count
+      }
+  }
+
+----------------------------------------------------------------
+7. ESCAPE ANALYSIS
+----------------------------------------------------------------
+The compiler checks at COMPILE TIME:
+
+  "Is this variable used by a function that outlives
+   the current scope?"
+       YES → move it to HEAP (variable "escapes")
+       NO  → keep it on STACK
+
+You don't write any syntax — compiler decides.
+
+Check it yourself:
+  go build -gcflags="-m" main.go
+
+Output:
+  moved to heap: count
+  func literal escapes to heap
+
+----------------------------------------------------------------
+8. MENTAL MODEL
+----------------------------------------------------------------
+  Stack variable  → sticky note on a desk
+                    (thrown away when you leave)
+
+  Heap variable   → sticky note locked in a locker
+                    (anyone with the key can return)
+
+  Closure         → the key to the locker
+
+  HEAP                           STACK
+  ┌──────────────┐               ┌─────────────────────┐
+  │  count = 0   │ ◄─────────────┤ inner function      │
+  └──────────────┘               │ (holds pointer ──┐) │
+                                 └──────────────────┼──┘
+                                                    ▼
+                                              points to count
+
+----------------------------------------------------------------
+9. WHEN DO CAPTURED VARIABLES DIE?
+----------------------------------------------------------------
+When NOTHING references them anymore.
+
+  c := counter()   // count alive on heap
+  c()              // count = 1
+  c = nil          // no references → GC frees it
+
+================================================================
+            CLOSURES IN OTHER LANGUAGES
+================================================================
+
+----------------------------------------------------------------
+10. SAME IDEA, DIFFERENT SYNTAX
+----------------------------------------------------------------
+JavaScript:
+  const counter = () => {
+      let count = 0;
+      return () => {
+          count++;
+          return count;
+      };
+  };
+
+Python:
+  def counter():
+      count = 0
+      def inner():
+          nonlocal count
+          count += 1
+          return count
+      return inner
+
+Go:
+  func counter() func() int {
+      count := 0
+      return func() int {
+          count++
+          return count
+      }
+  }
+
+Differences:
+  - JS: arrow functions (`=>`), short syntax
+  - Python: needs `nonlocal` to modify captured vars
+  - Go: always use `func`, explicit return types
+
+Mental model is identical across all three.
+
+================================================================
+            CLOSURES IN MIDDLEWARE
+================================================================
+
+----------------------------------------------------------------
+11. THE FRAMEWORK CONSTRAINT
+----------------------------------------------------------------
+Every framework forces middleware into a FIXED SIGNATURE:
+
+  Fiber    → func(ctx *fiber.Ctx) error
+  Express  → function(req, res, next)
+  FastAPI  → async def m(request, call_next)
+
+You CANNOT add extra parameters.
+
+Why fixed?
+  - Framework calls thousands of handlers generically
+  - Doesn't know about your DB, logger, secret key
+  - Fixed signature = fast, type-safe, decoupled
+
+Think USB port: one shape, many devices plug in.
+
+----------------------------------------------------------------
+12. THE PROBLEM
+----------------------------------------------------------------
+Real middleware needs extras:
+  - logger
+  - DB connection
+  - secret key
+  - rate limit config
+
+But framework only gives `ctx`. Where do the extras go?
+
+----------------------------------------------------------------
+13. THE CLOSURE SOLUTION
+----------------------------------------------------------------
+  func Auth(secret string) fiber.Handler {  // ← extras here
+      return func(ctx *fiber.Ctx) error {   // ← framework shape
+          validate(ctx.Get("token"), secret)
+          return ctx.Next()
+      }
+  }
+
+  app.Use(Auth("my-secret-key"))
+
+What happens:
+  - Outer fn takes extras (your world)
+  - Inner fn matches framework's signature
+  - Inner fn captures extras via closure
+  - Extras live on HEAP until server shuts down
+
+----------------------------------------------------------------
+14. TIMELINE
+----------------------------------------------------------------
+SETUP TIME (once):
+  main()
+    └─ Auth("secret")
+        └─ "secret" escapes to HEAP 🎒
+        └─ returns inner fn
+        └─ framework stores it
+
+WAITING:
+  Auth() has already returned
+  But "secret" is still alive on heap
+
+REQUEST TIME (later, many times):
+  framework → calls inner fn with ctx
+              └─ reaches backpack → finds "secret"
+              └─ uses it
+
+Key insight:
+  Closures don't pass values DOWN through layers.
+  They carry values FORWARD in time.
+
+----------------------------------------------------------------
+15. PER-ROUTE CONFIGURATION
+----------------------------------------------------------------
+Same middleware, different configs:
+
+  app.Use("/api/free",    RateLimiter(10))
+  app.Use("/api/premium", RateLimiter(1000))
+
+Two SEPARATE closures, each with its own captured value.
+Impossible with global variables.
+
+----------------------------------------------------------------
+16. WHY NOT ALTERNATIVES?
+----------------------------------------------------------------
+(a) Global variables
+    - Only one config possible
+    - Hidden dependencies
+    - Hard to test
+
+(b) Stuffing into ctx.Locals
+    - No compile-time safety
+    - Type assertions everywhere
+    - Dependencies hidden inside handler body
+
+(c) Closures ✅
+    - Explicit dependencies in signature
+    - Type-safe
+    - Per-route configuration
+    - Clean separation
+
+================================================================
+            FULL EXAMPLE: FIBER API
+================================================================
+
+----------------------------------------------------------------
+17. COMPLETE WORKING CODE
+----------------------------------------------------------------
+  package main
+
+  import (
+      "fmt"
+      "github.com/gofiber/fiber/v2"
+  )
+
+  // ---------- CONTROLLER ----------
+  func ListEmployees(ctx *fiber.Ctx) error {
+      employees := []string{"Alice", "Bob", "Charlie"}
+      return ctx.JSON(fiber.Map{"employees": employees})
+  }
+
+  // ---------- MIDDLEWARE (closure) ----------
+  func LoggerMiddleware(appName string) fiber.Handler {
+      return func(ctx *fiber.Ctx) error {
+          fmt.Printf("[%s] %s %s\n",
+              appName, ctx.Method(), ctx.Path())
+          return ctx.Next()
+      }
+  }
+
+  // ---------- ROUTER ----------
+  func SetupRoutes(app *fiber.App) {
+      app.Use(LoggerMiddleware("MyAPI"))
+      app.Get("/employees", ListEmployees)
+  }
+
+  // ---------- MAIN ----------
+  func main() {
+      app := fiber.New()
+      SetupRoutes(app)
+      app.Listen(":3000")
+  }
+
+Where the closure is:
+  - Outer: LoggerMiddleware(appName) — runs ONCE at setup
+  - Inner: func(ctx) — runs PER REQUEST
+  - `appName` captured from outer, stored on HEAP
+
+----------------------------------------------------------------
+18. STRUCT METHODS vs CLOSURES
+----------------------------------------------------------------
+Both achieve dependency injection.
+
+Struct method (good for many dependencies):
+  type Service struct {
+      DB  *gorm.DB
+      Log *zap.SugaredLogger
+  }
+
+  func (s *Service) ListEmployees(ctx *fiber.Ctx) error {
+      // s.DB and s.Log are "captured" via receiver
+  }
+
+Closure (good for one or two values):
+  func Auth(secret string) fiber.Handler {
+      return func(ctx *fiber.Ctx) error { ... }
+  }
+
+Rule of thumb:
+  - Many deps → struct with methods
+  - One/two deps → closure
+
+Both are valid; closures are the lighter option.
+
+================================================================
+            COMMON USES OF CLOSURES
+================================================================
+
+----------------------------------------------------------------
+19. WHERE YOU'LL SEE THEM
+----------------------------------------------------------------
+(a) Middleware (auth, logging, rate limit)
+(b) Goroutines:
+      go func() { doWork() }()
+(c) defer:
+      defer func() { cleanup() }()
+(d) Function factories:
+      multiplier(2), multiplier(3)
+(e) Callbacks (sort.Slice, http.HandlerFunc)
+(f) Encapsulating private state without structs
+
+================================================================
+            FINAL SUMMARY
+================================================================
+
+CONCEPTS:
+  - Anonymous fn = function with no name
+  - Closure      = function + captured variables
+  - Captured by REFERENCE, not value
+  - Each outer-fn call = new independent closure
+
+MEMORY:
+  - Normal locals → STACK → die on return
+  - Captured vars → HEAP  → live as long as referenced
+  - Compiler decides via ESCAPE ANALYSIS
+
+MIDDLEWARE:
+  - Framework forces fixed signature: func(ctx) error
+  - Closures smuggle in extra dependencies
+  - Setup-time capture, request-time usage
+  - Each app.Use() call = independent closure
+  - Enables per-route configuration
+
+MENTAL MODEL:
+  - Stack variable = sticky note on desk
+  - Heap variable  = sticky note in a locker
+  - Closure        = the key to the locker
+
+ONE-LINE TAKEAWAY:
+  Closures let a function remember variables from its
+  birthplace and carry them forward in time, which is
+  exactly what frameworks need to combine a fixed handler
+  signature with per-route dependencies.
+
+================================================================
+```
+
+

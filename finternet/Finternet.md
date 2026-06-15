@@ -18,7 +18,7 @@ Assets can be any property, bonds, paintings money -> all of the asset classes s
 
 why tokens?
 
-its similar to the physical records that we have for our asstes
+its similar to the physical records that we have for our assets
 for cryptography
 1. Make things immutable i.e token immutable using blockchain
 2. everyone see the same thing and even every change

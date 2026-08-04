@@ -1,6 +1,18 @@
+How to design a system (High level)
+1. List Functional requirements: System features/ functionalities
+2. If required Out of scope requirements like dependency functionalities or not majorly mentioned in the requirements
+3. List Non-functional requirements like availability, scalability, latency etc if required also mention out of scope requirements like fault tolerance, backups etc
+4. List Core entities of the application eg. if we take leet code as application its core entities are user, problem, solution, leadboard etc
+5. List high level api routes for the application
+6. write high level flow, schemas
+
+
 24/02/2026
 https://bytebytego.com/guides/the-ultimate-api-learning-roadmap/
 ## 1️⃣ Public APIs (Open APIs)
+
+
+
 
 **Definition:**  
 APIs that are exposed to external developers or the public over the internet.
@@ -861,11 +873,11 @@ Either:
 
 BASE is more relaxed than ACID.
 
-### 🔹 B – Basically Available
+### 🔹 BA – Basically Available
 
 - System always responds (even if data is not perfect)
 
-### 🔹 A – Soft State
+### 🔹 S – Soft State
 
 - Data can change over time (eventual updates)
 

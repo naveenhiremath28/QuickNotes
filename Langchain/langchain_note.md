@@ -9,7 +9,7 @@ Agentic AI and AI Agent difference ->
 AI Agent -?
 LLM -> knows how to generates the text
 if we configure or add some specifications to LLM to do certain task -> AI Agent
-speciifications in some sense -> tools
+specifications in some sense -> tools
 
 
 when we enable communication between the AI agents => Agentic AI

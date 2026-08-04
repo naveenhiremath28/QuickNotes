@@ -1,17 +1,35 @@
-1. In `key_references` table  
-	1. `address` field but storing did value
-	2. remove user_public_key field, no longer required
-2. In `registered_names` table 
-	1. missing values for the fields - did, email/phone hash, user_public_key, since email/phone hash are missed unique check from registry is failing
-3. In `accounts` table
-	1. missing values for the fields - email/mobile, pii
-4. `Instance POST /v1/account/create` api, according to new spec returning as expected response
-```json
-   "response": {
-	"accountId": "019ecb4c-0629-73dc-ac4d-a974790a9c12",
-	"did": "did:units:0xaed0900785f4....",
-	"status": "active"
-	}
-```
 
-	app expects keycloak's jwt in response, or else app has to hit login api again to get keycloak's jwt 
+Policies framework
+
+WASM
+AST
+REGO, JSONATA
+
+
+policy is like a json which will be executed on a particular event
+example we will check minimum balance will minting a token which is like a rule that should satisfy to mint new token -> policy)
+design(apis, schemas, how, when etc) such a way that minter/owner can create their own policies and can be used while minting, transfer
+currently pre checks we have while minting is hardcoded and if anything needs to be changed then we need to modify the code, instead we can decouple like policies and triggered whenever it required
+
+
+support string where user enter rego directly
+keep rego which we received in request..
+no need to have anchors table, instead create and dump policy in one table (policy table) have one more table where it stitches policy to primitive op
+
+
+also monitor cpu usage, memory taken by policy code for execution
+
+
+should we enhance premitive ops workflow or have one more workflow(if yes how premitive ops calls policy-evaluator)
+do we need seperate service which takes inputs runs wasm file and gives output
+possible ways to run wasm file
+
+
+TODO
+identities verification middleware
+
+
+
+
+
+#383 conflicts

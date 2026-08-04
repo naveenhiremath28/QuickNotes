@@ -92,16 +92,16 @@ Even though many services use OAuth 2.0 during login screens (“Sign in with Go
 | **Authentication** | Not handled by OAuth — use OIDC or similar for identity verification.                                |
 ## 🧠 Core Difference Overview
 
-|Aspect|**OAuth (OAuth 1.0)**|**OAuth 2.0**|
-|---|---|---|
-|**Version**|Original version of OAuth|Redesigned, not backward compatible with 1.0|
-|**Security Mechanism**|Requires cryptographic signatures on each request|Uses HTTPS/TLS instead of signatures for security|
-|**Complexity**|More complex to implement due to signatures|Simpler and more developer-friendly|
-|**Token Lifespan**|Tokens often long-lived|Access tokens are short-lived and often paired with refresh tokens|
-|**Flexibility**|Limited authorization flows|Multiple flows (grant types) for different app types|
-|**Roles Defined**|Fewer explicit roles; no separation of auth and resource servers|Clear separation: resource owner, client, auth server, resource server|
-|**Use Case Suitability**|Harder for mobile/non-browser clients|Designed for web, mobile, API, desktop apps|
-|**Backward Compatibility**|N/A|**Not backward compatible with OAuth 1.0**|
+| Aspect                     | **OAuth (OAuth 1.0)**                                            | **OAuth 2.0**                                                          |
+| -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Version**                | Original version of OAuth                                        | Redesigned, not backward compatible with 1.0                           |
+| **Security Mechanism**     | Requires cryptographic signatures on each request                | Uses HTTPS/TLS instead of signatures for security                      |
+| **Complexity**             | More complex to implement due to signatures                      | Simpler and more developer-friendly                                    |
+| **Token Lifespan**         | Tokens often long-lived                                          | Access tokens are short-lived and often paired with refresh tokens     |
+| **Flexibility**            | Limited authorization flows                                      | Multiple flows (grant types) for different app types                   |
+| **Roles Defined**          | Fewer explicit roles; no separation of auth and resource servers | Clear separation: resource owner, client, auth server, resource server |
+| **Use Case Suitability**   | Harder for mobile/non-browser clients                            | Designed for web, mobile, API, desktop apps                            |
+| **Backward Compatibility** | N/A                                                              | **Not backward compatible with OAuth 1.0**                             |
 
 ---
 

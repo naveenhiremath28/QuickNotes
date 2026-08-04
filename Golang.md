@@ -1,5 +1,44 @@
+```
+46:25
+```
+
+main use case of Golang, designed to run multiple cores and built to support **concurrency**
+concurrency in go is **cheap and easy**
+since there is no builtin concurrency mechanism in python, node unless like golang, c++, java
+
+but handling concurrency in c++, java is expensive, comparitively slow, complex code(which also leads to more human error)
+
+so golang is best for:
+- Performant Applications
+- running on scaled, distributed systems
+
+characteristics of golang:
+- simple and readable syntax of dynamically typed language like **Python**
+- efficiency and safety lower-level, statically typed language like **C++**
+- simple syntax: easy to learn, read and write code
+- simplicity: easy to maintain over the time
+- fast build time, start up and run
+- requires fewer resources
+
+
+Go is a compiled language, compiles to a single binary (machine code)
+main.go - compiles to - main.exe
+consistent across different OS
+
+Docker, hashicorp vault, kubernetes - written in golang
 
 easy way - https://gobyexample.com
+
+# Go Programming:
+
+Go programs are organized into **packages**
+**Package** is nothing but combination of source files (folder -> files)
+
+
+
+
+
+
 
 ## SLICE TYPE & make()
 ```
@@ -971,3 +1010,35 @@ ONE-LINE TAKEAWAY:
 ```
 
 
+----
+---
+
+Pointers
+when we store something in variable internally it stored in memory, so when we used variable name go compiler should find that value in memory, so for this we use pointer 
+pointer is a variable that stores memory address of another variable that references actual value
+i.e &variable_name
+in golang pointers are also called special variable
+
+#### Quick Reference
+
+| Syntax   | Name            | Gives you        | Use when                                                     |
+| -------- | --------------- | ---------------- | ------------------------------------------------------------ |
+| `x`      | **value**       | the actual value | reading/using the data                                       |
+| **`&x`** | **address-of**  | pointer to x     | passing to func that needs to mutate, or storing a reference |
+| `*p`     | **dereference** | value at pointer | reading/writing through a pointer                            |
+
+---
+
+
+
+
+
+
+
+
+
+
+explore on this
+
+when there is already existing programming language why we need new languages?
+what is concurrency?
